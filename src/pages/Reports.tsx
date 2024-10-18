@@ -49,16 +49,17 @@ const Reports = () => {
     const headers = ["Nom d'utilisateur", "Date", "Entrée", "Sortie", "Durée"];
     
     pdf.setFontSize(10);
-    pdf.table(20, 20, formattedData.map(entry => {
+    const tableData = formattedData.map(entry => {
       const user = users.find(u => u.id === entry.userId);
-      return [
-        user ? `${user.firstName} ${user.lastName}` : 'Inconnu',
-        entry.date,
-        entry.checkIn,
-        entry.checkOut,
-        entry.duration
-      ];
-    }), headers, { autoSize: true });
+      return {
+        "Nom d'utilisateur": user ? `${user.firstName} ${user.lastName}` : 'Inconnu',
+        "Date": entry.date,
+        "Entrée": entry.checkIn,
+        "Sortie": entry.checkOut,
+        "Durée": entry.duration
+      };
+    });
+    pdf.table(20, 20, tableData, headers, { autoSize: true });
 
     pdf.save("rapport_presence.pdf");
     toast.success("Téléchargement du rapport PDF terminé !");
