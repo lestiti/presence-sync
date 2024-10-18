@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
+import localforage from 'localforage';
 
 const QRScanner = () => {
   const [scanning, setScanning] = useState(false);
@@ -38,6 +39,25 @@ const QRScanner = () => {
     }
   };
 
+  const handleScan = async (qrCode: string) => {
+    const lastScan = await localforage.getItem<{ type: 'entry' | 'exit', timestamp: number } | null>(qrCode);
+    
+    if (!lastScan || Date.now() - lastScan.timestamp > 24 * 60 * 60 * 1000) {
+      // Premier scan ou dernier scan il y a plus de 24 heures : Entrée
+      await localforage.setItem(qrCode, { type: 'entry', timestamp: Date.now() });
+      toast.success(`Entrée enregistrée pour le code QR: ${qrCode}`);
+    } else if (lastScan.type === 'entry') {
+      // Deuxième scan : Sortie
+      await localforage.setItem(qrCode, { type: 'exit', timestamp: Date.now() });
+      toast.success(`Sortie enregistrée pour le code QR: ${qrCode}`);
+    } else {
+      // Scan supplémentaire : Ignorer
+      toast.info(`Scan ignoré. Entrée et sortie déjà enregistrées pour le code QR: ${qrCode}`);
+    }
+    
+    setScanning(false);
+  };
+
   const tick = () => {
     if (videoRef.current && canvasRef.current) {
       if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
@@ -52,8 +72,7 @@ const QRScanner = () => {
           });
           if (code) {
             console.log("QR Code détecté", code.data);
-            toast.success(`QR Code détecté: ${code.data}`);
-            setScanning(false);
+            handleScan(code.data);
             return;
           }
         }
@@ -62,7 +81,7 @@ const QRScanner = () => {
     }
   };
 
-  const handleScan = () => {
+  const toggleScanning = () => {
     setScanning(!scanning);
   };
 
@@ -81,7 +100,7 @@ const QRScanner = () => {
           </div>
         )}
       </div>
-      <Button onClick={handleScan} className="bg-gold text-black hover:bg-yellow-600">
+      <Button onClick={toggleScanning} className="bg-gold text-black hover:bg-yellow-600">
         {scanning ? 'Arrêter le scan' : 'Scanner QR Code'}
       </Button>
     </div>
