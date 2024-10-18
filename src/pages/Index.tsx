@@ -3,8 +3,20 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from '../components/Header';
 import QRScanner from '../components/QRScanner';
+import localforage from 'localforage';
+import { toast } from "sonner"
 
 const Index = () => {
+  const handleReset = async () => {
+    try {
+      await localforage.clear();
+      toast.success("L'application a été réinitialisée avec succès.");
+    } catch (error) {
+      console.error("Erreur lors de la réinitialisation:", error);
+      toast.error("Une erreur est survenue lors de la réinitialisation.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Header />
@@ -23,6 +35,9 @@ const Index = () => {
             </Button>
             <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-black">
               Voir les rapports
+            </Button>
+            <Button onClick={handleReset} variant="destructive" className="bg-red-600 hover:bg-red-700 text-white">
+              Réinitialiser l'application
             </Button>
           </CardFooter>
         </Card>
