@@ -60,14 +60,32 @@ const Reports = () => {
     }
   };
 
+  const formatAttendanceData = (data: AttendanceRecord[]) => {
+    const formattedData: { [key: string]: { userId: string, checkIn?: Date, checkOut?: Date } } = {};
+    data.forEach(entry => {
+      if (!formattedData[entry.userId]) {
+        formattedData[entry.userId] = { userId: entry.userId };
+      }
+      if (entry.type === 'check-in') {
+        formattedData[entry.userId].checkIn = new Date(entry.timestamp);
+      } else {
+        formattedData[entry.userId].checkOut = new Date(entry.timestamp);
+      }
+    });
+    return Object.values(formattedData);
+  };
+
   const handleDownloadPDF = () => {
     const pdf = new jsPDF();
     pdf.text("Rapport de présence", 20, 10);
     
-    attendanceData.forEach((entry, index) => {
+    const formattedData = formatAttendanceData(attendanceData);
+    formattedData.forEach((entry, index) => {
       const user = users.find(u => u.id === entry.userId);
       const yPosition = 20 + (index * 10);
-      pdf.text(`${user?.firstName} ${user?.lastName}: ${entry.type} à ${new Date(entry.timestamp).toLocaleString()}`, 20, yPosition);
+      const checkInTime = entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A';
+      const checkOutTime = entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A';
+      pdf.text(`${user?.firstName} ${user?.lastName}: Entrée: ${checkInTime}, Sortie: ${checkOutTime}`, 20, yPosition);
     });
 
     pdf.save("rapport_presence.pdf");
@@ -75,15 +93,16 @@ const Reports = () => {
   };
 
   const handleDownloadExcel = () => {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(attendanceData.map(entry => {
+    const formattedData = formatAttendanceData(attendanceData);
+    const worksheet = XLSX.utils.json_to_sheet(formattedData.map(entry => {
       const user = users.find(u => u.id === entry.userId);
       return {
         Nom: `${user?.firstName} ${user?.lastName}`,
-        Type: entry.type === 'check-in' ? 'Entrée' : 'Sortie',
-        Horodatage: new Date(entry.timestamp).toLocaleString()
+        "Heure d'entrée": entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A',
+        "Heure de sortie": entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A'
       };
     }));
+    const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Présences");
     XLSX.writeFile(workbook, "rapport_presence.xlsx");
     toast.success("Téléchargement du rapport Excel terminé !");
@@ -102,18 +121,18 @@ const Reports = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nom</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Horodatage</TableHead>
+                  <TableHead>Heure d'entrée</TableHead>
+                  <TableHead>Heure de sortie</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {todayAttendance.map((entry, index) => {
+                {formatAttendanceData(todayAttendance).map((entry, index) => {
                   const user = users.find(u => u.id === entry.userId);
                   return (
                     <TableRow key={index}>
                       <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
-                      <TableCell>{entry.type === 'check-in' ? 'Entrée' : 'Sortie'}</TableCell>
-                      <TableCell>{new Date(entry.timestamp).toLocaleString()}</TableCell>
+                      <TableCell>{entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A'}</TableCell>
+                      <TableCell>{entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A'}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -155,18 +174,18 @@ const Reports = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nom</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Horodatage</TableHead>
+                    <TableHead>Heure d'entrée</TableHead>
+                    <TableHead>Heure de sortie</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {attendanceData.map((entry, index) => {
+                  {formatAttendanceData(attendanceData).map((entry, index) => {
                     const user = users.find(u => u.id === entry.userId);
                     return (
                       <TableRow key={index}>
                         <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
-                        <TableCell>{entry.type === 'check-in' ? 'Entrée' : 'Sortie'}</TableCell>
-                        <TableCell>{new Date(entry.timestamp).toLocaleString()}</TableCell>
+                        <TableCell>{entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A'}</TableCell>
+                        <TableCell>{entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A'}</TableCell>
                       </TableRow>
                     );
                   })}
