@@ -16,9 +16,9 @@ const Users = () => {
     phoneNumber: '',
     role: '',
   });
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    // Charger les utilisateurs depuis localforage au chargement du composant
     const loadUsers = async () => {
       const storedUsers = await localforage.getItem<User[]>('users');
       if (storedUsers) {
@@ -26,6 +26,17 @@ const Users = () => {
       }
     };
     loadUsers();
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,6 +170,11 @@ const Users = () => {
             )}
           </CardContent>
         </Card>
+        {!isOnline && (
+          <div className="mt-4 p-4 bg-yellow-500 text-black rounded">
+            Vous êtes actuellement hors ligne. Les modifications seront synchronisées lorsque vous serez de nouveau en ligne.
+          </div>
+        )}
       </main>
     </div>
   );
