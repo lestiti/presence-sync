@@ -6,45 +6,47 @@ import CustomDatePicker from '../components/CustomDatePicker';
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileDown } from 'lucide-react';
+import jsPDF from 'jspdf';
 
-// Simulons des données d'entrées et sorties
+// Simulons des données d'entrées et sorties, y compris pour aujourd'hui
+const today = new Date();
 const mockAttendanceData = [
   { id: 1, name: "John Doe", checkIn: "2023-05-01T08:00:00", checkOut: "2023-05-01T17:00:00" },
   { id: 2, name: "Jane Smith", checkIn: "2023-05-01T08:30:00", checkOut: "2023-05-01T16:45:00" },
+  { id: 3, name: "Alice Johnson", checkIn: today.toISOString(), checkOut: new Date(today.getTime() + 8 * 60 * 60 * 1000).toISOString() },
   // ... ajoutez plus de données simulées si nécessaire
 ];
 
 const Reports = () => {
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [attendanceData, setAttendanceData] = useState(mockAttendanceData);
 
   const handleGenerateReport = () => {
     if (startDate && endDate) {
-      // Ici, vous feriez normalement un appel API pour obtenir les données réelles
-      // Pour cet exemple, nous utilisons simplement les données simulées
-      toast.success("Rapport généré avec succès !");
       // Filtrer les données selon la plage de dates sélectionnée
       const filteredData = mockAttendanceData.filter(entry => {
         const entryDate = new Date(entry.checkIn);
         return entryDate >= startDate && entryDate <= endDate;
       });
       setAttendanceData(filteredData);
+      toast.success("Rapport généré avec succès !");
     } else {
       toast.error("Veuillez sélectionner une date de début et de fin.");
     }
   };
 
   const handleDownloadPDF = () => {
-    // Ici, vous implémenteriez la logique réelle de génération de PDF
-    // Pour cet exemple, nous simulons simplement le téléchargement
-    toast.success("Téléchargement du rapport PDF...");
-    setTimeout(() => {
-      const link = document.createElement('a');
-      link.href = '#';
-      link.download = 'rapport_presence.pdf';
-      link.click();
-    }, 1000);
+    const pdf = new jsPDF();
+    pdf.text("Rapport de présence", 20, 10);
+    
+    attendanceData.forEach((entry, index) => {
+      const yPosition = 20 + (index * 10);
+      pdf.text(`${entry.name}: Entrée ${new Date(entry.checkIn).toLocaleString()} - Sortie ${new Date(entry.checkOut).toLocaleString()}`, 20, yPosition);
+    });
+
+    pdf.save("rapport_presence.pdf");
+    toast.success("Téléchargement du rapport PDF terminé !");
   };
 
   return (
