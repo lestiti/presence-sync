@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { User } from '../utils/types';
 import Header from '../components/Header';
 import QRCode from 'qrcode';
+import localforage from 'localforage';
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -15,6 +16,17 @@ const Users = () => {
     phoneNumber: '',
     role: '',
   });
+
+  useEffect(() => {
+    // Charger les utilisateurs depuis localforage au chargement du composant
+    const loadUsers = async () => {
+      const storedUsers = await localforage.getItem<User[]>('users');
+      if (storedUsers) {
+        setUsers(storedUsers);
+      }
+    };
+    loadUsers();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,13 +50,17 @@ const Users = () => {
       id: userId,
       qrCode,
     };
-    setUsers(prev => [...prev, user]);
+    const updatedUsers = [...users, user];
+    setUsers(updatedUsers);
+    await localforage.setItem('users', updatedUsers);
     setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
     toast.success("Utilisateur ajouté avec succès !");
   };
 
-  const handleDeleteUser = (id: string) => {
-    setUsers(users.filter(user => user.id !== id));
+  const handleDeleteUser = async (id: string) => {
+    const updatedUsers = users.filter(user => user.id !== id);
+    setUsers(updatedUsers);
+    await localforage.setItem('users', updatedUsers);
     toast.success("Utilisateur supprimé avec succès !");
   };
 
@@ -60,7 +76,9 @@ const Users = () => {
 
   const handleRegenerateQR = async (user: User) => {
     const newQRCode = await generateQRCode(user.id);
-    setUsers(users.map(u => u.id === user.id ? { ...u, qrCode: newQRCode } : u));
+    const updatedUsers = users.map(u => u.id === user.id ? { ...u, qrCode: newQRCode } : u);
+    setUsers(updatedUsers);
+    await localforage.setItem('users', updatedUsers);
     toast.success("QR Code régénéré avec succès !");
   };
 
