@@ -10,6 +10,7 @@ import jsPDF from 'jspdf';
 import localforage from 'localforage';
 import { AttendanceRecord, User } from '../utils/types';
 import * as XLSX from 'xlsx';
+import { formatAttendanceData } from '../utils/attendanceUtils';
 
 const Reports = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
@@ -60,21 +61,6 @@ const Reports = () => {
     }
   };
 
-  const formatAttendanceData = (data: AttendanceRecord[]) => {
-    const formattedData: { [key: string]: { userId: string, checkIn?: Date, checkOut?: Date } } = {};
-    data.forEach(entry => {
-      if (!formattedData[entry.userId]) {
-        formattedData[entry.userId] = { userId: entry.userId };
-      }
-      if (entry.type === 'check-in') {
-        formattedData[entry.userId].checkIn = new Date(entry.timestamp);
-      } else {
-        formattedData[entry.userId].checkOut = new Date(entry.timestamp);
-      }
-    });
-    return Object.values(formattedData);
-  };
-
   const handleDownloadPDF = () => {
     const pdf = new jsPDF();
     pdf.text("Rapport de présence", 20, 10);
@@ -83,9 +69,7 @@ const Reports = () => {
     formattedData.forEach((entry, index) => {
       const user = users.find(u => u.id === entry.userId);
       const yPosition = 20 + (index * 10);
-      const checkInTime = entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A';
-      const checkOutTime = entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A';
-      pdf.text(`${user?.firstName} ${user?.lastName}: Entrée: ${checkInTime}, Sortie: ${checkOutTime}`, 20, yPosition);
+      pdf.text(`${user?.firstName} ${user?.lastName}: ${entry.checkIn} - ${entry.checkOut}`, 20, yPosition);
     });
 
     pdf.save("rapport_presence.pdf");
@@ -98,8 +82,8 @@ const Reports = () => {
       const user = users.find(u => u.id === entry.userId);
       return {
         Nom: `${user?.firstName} ${user?.lastName}`,
-        "Heure d'entrée": entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A',
-        "Heure de sortie": entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A'
+        "Entrée": entry.checkIn,
+        "Sortie": entry.checkOut
       };
     }));
     const workbook = XLSX.utils.book_new();
@@ -121,8 +105,8 @@ const Reports = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nom</TableHead>
-                  <TableHead>Heure d'entrée</TableHead>
-                  <TableHead>Heure de sortie</TableHead>
+                  <TableHead>Entrée</TableHead>
+                  <TableHead>Sortie</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -131,8 +115,8 @@ const Reports = () => {
                   return (
                     <TableRow key={index}>
                       <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
-                      <TableCell>{entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A'}</TableCell>
-                      <TableCell>{entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A'}</TableCell>
+                      <TableCell>{entry.checkIn}</TableCell>
+                      <TableCell>{entry.checkOut}</TableCell>
                     </TableRow>
                   );
                 })}
@@ -174,8 +158,8 @@ const Reports = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nom</TableHead>
-                    <TableHead>Heure d'entrée</TableHead>
-                    <TableHead>Heure de sortie</TableHead>
+                    <TableHead>Entrée</TableHead>
+                    <TableHead>Sortie</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -184,8 +168,8 @@ const Reports = () => {
                     return (
                       <TableRow key={index}>
                         <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
-                        <TableCell>{entry.checkIn ? entry.checkIn.toLocaleString() : 'N/A'}</TableCell>
-                        <TableCell>{entry.checkOut ? entry.checkOut.toLocaleString() : 'N/A'}</TableCell>
+                        <TableCell>{entry.checkIn}</TableCell>
+                        <TableCell>{entry.checkOut}</TableCell>
                       </TableRow>
                     );
                   })}

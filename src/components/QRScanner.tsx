@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
 import localforage from 'localforage';
-import { AttendanceRecord } from '../utils/types';
+import { AttendanceRecord, User } from '../utils/types';
+import { getWelcomeMessage, getExitMessage } from '../utils/messages';
 
 const QRScanner = () => {
   const [scanning, setScanning] = useState(false);
@@ -41,15 +42,29 @@ const QRScanner = () => {
   };
 
   const handleScan = async (qrCode: string) => {
+    const users = await localforage.getItem<User[]>('users') || [];
+    const user = users.find(u => u.id === qrCode);
+    if (!user) {
+      toast.error("Utilisateur non trouvé");
+      return;
+    }
+
     const attendanceRecords = await localforage.getItem<AttendanceRecord[]>('attendance') || [];
+    const lastRecord = attendanceRecords.filter(record => record.userId === qrCode).pop();
+    const newType = lastRecord?.type === 'check-in' ? 'check-out' : 'check-in';
+
     const newRecord: AttendanceRecord = {
       userId: qrCode,
       timestamp: new Date(),
-      type: attendanceRecords.length % 2 === 0 ? 'check-in' : 'check-out'
+      type: newType
     };
     attendanceRecords.push(newRecord);
     await localforage.setItem('attendance', attendanceRecords);
-    toast.success(`${newRecord.type === 'check-in' ? 'Entrée' : 'Sortie'} enregistrée pour l'utilisateur: ${qrCode}`);
+
+    const message = newType === 'check-in' 
+      ? getWelcomeMessage(`${user.firstName} ${user.lastName}`)
+      : getExitMessage();
+    toast.success(message);
     setScanning(false);
   };
 
