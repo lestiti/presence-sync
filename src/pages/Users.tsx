@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { User } from '../utils/types';
 import Header from '../components/Header';
+import QRCode from 'qrcode';
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -20,11 +21,22 @@ const Users = () => {
     setNewUser(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddUser = () => {
+  const generateQRCode = async (userId: string): Promise<string> => {
+    try {
+      return await QRCode.toDataURL(userId);
+    } catch (err) {
+      console.error(err);
+      return '';
+    }
+  };
+
+  const handleAddUser = async () => {
+    const userId = Date.now().toString();
+    const qrCode = await generateQRCode(userId);
     const user: User = {
       ...newUser,
-      id: Date.now().toString(),
-      qrCode: `QR_${Date.now()}`, // Placeholder for QR code generation
+      id: userId,
+      qrCode,
     };
     setUsers(prev => [...prev, user]);
     setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
@@ -34,6 +46,22 @@ const Users = () => {
   const handleDeleteUser = (id: string) => {
     setUsers(users.filter(user => user.id !== id));
     toast.success("Utilisateur supprimé avec succès !");
+  };
+
+  const handleDownloadQR = (user: User) => {
+    const link = document.createElement('a');
+    link.href = user.qrCode;
+    link.download = `${user.firstName}_${user.lastName}_QR.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("QR Code téléchargé avec succès !");
+  };
+
+  const handleRegenerateQR = async (user: User) => {
+    const newQRCode = await generateQRCode(user.id);
+    setUsers(users.map(u => u.id === user.id ? { ...u, qrCode: newQRCode } : u));
+    toast.success("QR Code régénéré avec succès !");
   };
 
   return (
@@ -96,9 +124,17 @@ const Users = () => {
                       <p className="font-bold">{user.firstName} {user.lastName}</p>
                       <p className="text-sm text-gray-400">{user.role}</p>
                     </div>
-                    <Button onClick={() => handleDeleteUser(user.id)} variant="destructive">
-                      Supprimer
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button onClick={() => handleDownloadQR(user)} className="bg-gold text-black hover:bg-yellow-600">
+                        Télécharger QR
+                      </Button>
+                      <Button onClick={() => handleRegenerateQR(user)} className="bg-blue-500 hover:bg-blue-600">
+                        Régénérer QR
+                      </Button>
+                      <Button onClick={() => handleDeleteUser(user.id)} variant="destructive">
+                        Supprimer
+                      </Button>
+                    </div>
                   </li>
                 ))}
               </ul>
