@@ -12,7 +12,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    if (id === 'Fpvm services' && password === 'FpvmCh2024*') {
+    if (id === 'Fpvm services' && password === '2024*FpvmCh') {
       onLogin(true);
       toast.success("Connexion admin réussie");
     } else {
