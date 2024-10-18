@@ -5,8 +5,11 @@ import Header from '../components/Header';
 import QRScanner from '../components/QRScanner';
 import localforage from 'localforage';
 import { toast } from "sonner"
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
+  const navigate = useNavigate();
+
   const handleReset = async () => {
     try {
       await localforage.clear();
@@ -30,10 +33,18 @@ const Index = () => {
             <QRScanner />
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-black">
+            <Button 
+              variant="outline" 
+              className="border-gold text-gold hover:bg-gold hover:text-black"
+              onClick={() => navigate('/users')}
+            >
               Gérer les utilisateurs
             </Button>
-            <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-black">
+            <Button 
+              variant="outline" 
+              className="border-gold text-gold hover:bg-gold hover:text-black"
+              onClick={() => navigate('/reports')}
+            >
               Voir les rapports
             </Button>
             <Button onClick={handleReset} variant="destructive" className="bg-red-600 hover:bg-red-700 text-white">
