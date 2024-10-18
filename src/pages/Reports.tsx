@@ -9,12 +9,14 @@ import { FileDown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import localforage from 'localforage';
 import { AttendanceRecord, User } from '../utils/types';
+import * as XLSX from 'xlsx';
 
 const Reports = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [todayAttendance, setTodayAttendance] = useState<AttendanceRecord[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -22,8 +24,27 @@ const Reports = () => {
       setUsers(storedUsers);
       const storedAttendance = await localforage.getItem<AttendanceRecord[]>('attendance') || [];
       setAttendanceData(storedAttendance);
+      
+      // Filtrer les présences du jour
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayRecords = storedAttendance.filter(entry => {
+        const entryDate = new Date(entry.timestamp);
+        return entryDate >= today;
+      });
+      setTodayAttendance(todayRecords);
     };
     loadData();
+
+    // Réinitialiser les présences du jour toutes les 24 heures
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    const msUntilMidnight = midnight.getTime() - new Date().getTime();
+    const timer = setTimeout(() => {
+      setTodayAttendance([]);
+    }, msUntilMidnight);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleGenerateReport = () => {
@@ -53,10 +74,54 @@ const Reports = () => {
     toast.success("Téléchargement du rapport PDF terminé !");
   };
 
+  const handleDownloadExcel = () => {
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(attendanceData.map(entry => {
+      const user = users.find(u => u.id === entry.userId);
+      return {
+        Nom: `${user?.firstName} ${user?.lastName}`,
+        Type: entry.type === 'check-in' ? 'Entrée' : 'Sortie',
+        Horodatage: new Date(entry.timestamp).toLocaleString()
+      };
+    }));
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Présences");
+    XLSX.writeFile(workbook, "rapport_presence.xlsx");
+    toast.success("Téléchargement du rapport Excel terminé !");
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Header />
       <main className="container mx-auto px-4 py-8">
+        <Card className="bg-gray-900 border-gold mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-gold">Présences du jour</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Horodatage</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {todayAttendance.map((entry, index) => {
+                  const user = users.find(u => u.id === entry.userId);
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
+                      <TableCell>{entry.type === 'check-in' ? 'Entrée' : 'Sortie'}</TableCell>
+                      <TableCell>{new Date(entry.timestamp).toLocaleString()}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
         <Card className="bg-gray-900 border-gold">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-gold">Rapports de présence</CardTitle>
@@ -79,6 +144,10 @@ const Reports = () => {
               <Button onClick={handleDownloadPDF} className="bg-blue-500 text-white hover:bg-blue-600">
                 <FileDown className="mr-2 h-4 w-4" />
                 Télécharger en PDF
+              </Button>
+              <Button onClick={handleDownloadExcel} className="bg-green-500 text-white hover:bg-green-600">
+                <FileDown className="mr-2 h-4 w-4" />
+                Télécharger en Excel
               </Button>
             </div>
             {attendanceData.length > 0 && (
