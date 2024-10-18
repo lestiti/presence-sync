@@ -11,12 +11,16 @@ import localforage from 'localforage';
 import { AttendanceRecord, User } from '../utils/types';
 import * as XLSX from 'xlsx';
 import { formatAttendanceData } from '../utils/attendanceUtils';
+import AdminLogin from '../components/AdminLogin';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 
 const Reports = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const { isAdminLoggedIn, loginAdmin } = useAdminAuth();
 
   useEffect(() => {
     const loadData = async () => {
@@ -38,6 +42,26 @@ const Reports = () => {
       toast.success("Rapport généré avec succès !");
     } else {
       toast.error("Veuillez sélectionner une date de début et de fin.");
+    }
+  };
+
+  const handleDownload = (type: 'pdf' | 'excel') => {
+    if (isAdminLoggedIn) {
+      if (type === 'pdf') {
+        handleDownloadPDF();
+      } else {
+        handleDownloadExcel();
+      }
+    } else {
+      setShowAdminLogin(true);
+    }
+  };
+
+  const handleAdminLogin = (success: boolean) => {
+    loginAdmin(success);
+    setShowAdminLogin(false);
+    if (success) {
+      toast.success("Connexion admin réussie. Vous pouvez maintenant télécharger les rapports.");
     }
   };
 
@@ -92,55 +116,61 @@ const Reports = () => {
             <CardTitle className="text-2xl font-bold text-gold">Rapports de présence</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex space-x-4">
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium text-gray-400">Date de début</label>
-                <CustomDatePicker date={startDate} setDate={setStartDate} />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium text-gray-400">Date de fin</label>
-                <CustomDatePicker date={endDate} setDate={setEndDate} />
-              </div>
-            </div>
-            <div className="flex space-x-4">
-              <Button onClick={handleGenerateReport} className="bg-gold text-black hover:bg-yellow-600">
-                Générer le rapport
-              </Button>
-              <Button onClick={handleDownloadPDF} className="bg-blue-500 text-white hover:bg-blue-600">
-                <FileDown className="mr-2 h-4 w-4" />
-                Télécharger en PDF
-              </Button>
-              <Button onClick={handleDownloadExcel} className="bg-green-500 text-white hover:bg-green-600">
-                <FileDown className="mr-2 h-4 w-4" />
-                Télécharger en Excel
-              </Button>
-            </div>
-            {attendanceData.length > 0 && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom d'utilisateur</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Entrée</TableHead>
-                    <TableHead>Sortie</TableHead>
-                    <TableHead>Durée</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {formatAttendanceData(attendanceData).map((entry, index) => {
-                    const user = users.find(u => u.id === entry.userId);
-                    return (
-                      <TableRow key={index}>
-                        <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
-                        <TableCell>{entry.date}</TableCell>
-                        <TableCell>{entry.checkIn}</TableCell>
-                        <TableCell>{entry.checkOut}</TableCell>
-                        <TableCell>{entry.duration}</TableCell>
+            {showAdminLogin ? (
+              <AdminLogin onLogin={handleAdminLogin} />
+            ) : (
+              <>
+                <div className="flex space-x-4">
+                  <div className="flex flex-col space-y-2">
+                    <label className="text-sm font-medium text-gray-400">Date de début</label>
+                    <CustomDatePicker date={startDate} setDate={setStartDate} />
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <label className="text-sm font-medium text-gray-400">Date de fin</label>
+                    <CustomDatePicker date={endDate} setDate={setEndDate} />
+                  </div>
+                </div>
+                <div className="flex space-x-4">
+                  <Button onClick={handleGenerateReport} className="bg-gold text-black hover:bg-yellow-600">
+                    Générer le rapport
+                  </Button>
+                  <Button onClick={() => handleDownload('pdf')} className="bg-blue-500 text-white hover:bg-blue-600">
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Télécharger en PDF
+                  </Button>
+                  <Button onClick={() => handleDownload('excel')} className="bg-green-500 text-white hover:bg-green-600">
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Télécharger en Excel
+                  </Button>
+                </div>
+                {attendanceData.length > 0 && (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nom d'utilisateur</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Entrée</TableHead>
+                        <TableHead>Sortie</TableHead>
+                        <TableHead>Durée</TableHead>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {formatAttendanceData(attendanceData).map((entry, index) => {
+                        const user = users.find(u => u.id === entry.userId);
+                        return (
+                          <TableRow key={index}>
+                            <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
+                            <TableCell>{entry.date}</TableCell>
+                            <TableCell>{entry.checkIn}</TableCell>
+                            <TableCell>{entry.checkOut}</TableCell>
+                            <TableCell>{entry.duration}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </>
             )}
           </CardContent>
         </Card>

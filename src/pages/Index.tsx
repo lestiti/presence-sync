@@ -1,22 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from '../components/Header';
 import QRScanner from '../components/QRScanner';
+import AdminLogin from '../components/AdminLogin';
 import localforage from 'localforage';
 import { toast } from "sonner"
 import { useNavigate } from 'react-router-dom';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { isAdminLoggedIn, loginAdmin, logoutAdmin } = useAdminAuth();
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
 
   const handleReset = async () => {
-    try {
-      await localforage.clear();
-      toast.success("L'application a été réinitialisée avec succès.");
-    } catch (error) {
-      console.error("Erreur lors de la réinitialisation:", error);
-      toast.error("Une erreur est survenue lors de la réinitialisation.");
+    if (isAdminLoggedIn) {
+      try {
+        await localforage.clear();
+        toast.success("L'application a été réinitialisée avec succès.");
+        logoutAdmin();
+      } catch (error) {
+        console.error("Erreur lors de la réinitialisation:", error);
+        toast.error("Une erreur est survenue lors de la réinitialisation.");
+      }
+    } else {
+      setShowAdminLogin(true);
+    }
+  };
+
+  const handleAdminLogin = (success: boolean) => {
+    loginAdmin(success);
+    setShowAdminLogin(false);
+    if (success) {
+      handleReset();
     }
   };
 
@@ -30,7 +47,11 @@ const Index = () => {
             <CardDescription className="text-gray-400">Gérez vos présences facilement avec notre système de pointage par QR code</CardDescription>
           </CardHeader>
           <CardContent>
-            <QRScanner />
+            {showAdminLogin ? (
+              <AdminLogin onLogin={handleAdminLogin} />
+            ) : (
+              <QRScanner />
+            )}
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button 
