@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
 import localforage from 'localforage';
+import { AttendanceRecord } from '../utils/types';
 
 const QRScanner = () => {
   const [scanning, setScanning] = useState(false);
@@ -40,21 +41,15 @@ const QRScanner = () => {
   };
 
   const handleScan = async (qrCode: string) => {
-    const lastScan = await localforage.getItem<{ type: 'entry' | 'exit', timestamp: number } | null>(qrCode);
-    
-    if (!lastScan || Date.now() - lastScan.timestamp > 24 * 60 * 60 * 1000) {
-      // Premier scan ou dernier scan il y a plus de 24 heures : Entrée
-      await localforage.setItem(qrCode, { type: 'entry', timestamp: Date.now() });
-      toast.success(`Entrée enregistrée pour le code QR: ${qrCode}`);
-    } else if (lastScan.type === 'entry') {
-      // Deuxième scan : Sortie
-      await localforage.setItem(qrCode, { type: 'exit', timestamp: Date.now() });
-      toast.success(`Sortie enregistrée pour le code QR: ${qrCode}`);
-    } else {
-      // Scan supplémentaire : Ignorer
-      toast.info(`Scan ignoré. Entrée et sortie déjà enregistrées pour le code QR: ${qrCode}`);
-    }
-    
+    const attendanceRecords = await localforage.getItem<AttendanceRecord[]>('attendance') || [];
+    const newRecord: AttendanceRecord = {
+      userId: qrCode,
+      timestamp: new Date(),
+      type: attendanceRecords.length % 2 === 0 ? 'check-in' : 'check-out'
+    };
+    attendanceRecords.push(newRecord);
+    await localforage.setItem('attendance', attendanceRecords);
+    toast.success(`${newRecord.type === 'check-in' ? 'Entrée' : 'Sortie'} enregistrée pour l'utilisateur: ${qrCode}`);
     setScanning(false);
   };
 
