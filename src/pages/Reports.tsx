@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,26 +7,29 @@ import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FileDown } from 'lucide-react';
 import jsPDF from 'jspdf';
-
-// Simulons des données d'entrées et sorties, y compris pour aujourd'hui
-const today = new Date();
-const mockAttendanceData = [
-  { id: 1, name: "John Doe", checkIn: "2023-05-01T08:00:00", checkOut: "2023-05-01T17:00:00" },
-  { id: 2, name: "Jane Smith", checkIn: "2023-05-01T08:30:00", checkOut: "2023-05-01T16:45:00" },
-  { id: 3, name: "Alice Johnson", checkIn: today.toISOString(), checkOut: new Date(today.getTime() + 8 * 60 * 60 * 1000).toISOString() },
-  // ... ajoutez plus de données simulées si nécessaire
-];
+import localforage from 'localforage';
+import { AttendanceRecord, User } from '../utils/types';
 
 const Reports = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
-  const [attendanceData, setAttendanceData] = useState(mockAttendanceData);
+  const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const storedUsers = await localforage.getItem<User[]>('users') || [];
+      setUsers(storedUsers);
+      const storedAttendance = await localforage.getItem<AttendanceRecord[]>('attendance') || [];
+      setAttendanceData(storedAttendance);
+    };
+    loadData();
+  }, []);
 
   const handleGenerateReport = () => {
     if (startDate && endDate) {
-      // Filtrer les données selon la plage de dates sélectionnée
-      const filteredData = mockAttendanceData.filter(entry => {
-        const entryDate = new Date(entry.checkIn);
+      const filteredData = attendanceData.filter(entry => {
+        const entryDate = new Date(entry.timestamp);
         return entryDate >= startDate && entryDate <= endDate;
       });
       setAttendanceData(filteredData);
@@ -41,8 +44,9 @@ const Reports = () => {
     pdf.text("Rapport de présence", 20, 10);
     
     attendanceData.forEach((entry, index) => {
+      const user = users.find(u => u.id === entry.userId);
       const yPosition = 20 + (index * 10);
-      pdf.text(`${entry.name}: Entrée ${new Date(entry.checkIn).toLocaleString()} - Sortie ${new Date(entry.checkOut).toLocaleString()}`, 20, yPosition);
+      pdf.text(`${user?.firstName} ${user?.lastName}: ${entry.type} à ${new Date(entry.timestamp).toLocaleString()}`, 20, yPosition);
     });
 
     pdf.save("rapport_presence.pdf");
@@ -82,18 +86,21 @@ const Reports = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nom</TableHead>
-                    <TableHead>Entrée</TableHead>
-                    <TableHead>Sortie</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Horodatage</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {attendanceData.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell>{entry.name}</TableCell>
-                      <TableCell>{new Date(entry.checkIn).toLocaleString()}</TableCell>
-                      <TableCell>{new Date(entry.checkOut).toLocaleString()}</TableCell>
-                    </TableRow>
-                  ))}
+                  {attendanceData.map((entry, index) => {
+                    const user = users.find(u => u.id === entry.userId);
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
+                        <TableCell>{entry.type === 'check-in' ? 'Entrée' : 'Sortie'}</TableCell>
+                        <TableCell>{new Date(entry.timestamp).toLocaleString()}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
