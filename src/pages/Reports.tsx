@@ -17,7 +17,6 @@ const Reports = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [todayAttendance, setTodayAttendance] = useState<AttendanceRecord[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -25,27 +24,8 @@ const Reports = () => {
       setUsers(storedUsers);
       const storedAttendance = await localforage.getItem<AttendanceRecord[]>('attendance') || [];
       setAttendanceData(storedAttendance);
-      
-      // Filtrer les présences du jour
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayRecords = storedAttendance.filter(entry => {
-        const entryDate = new Date(entry.timestamp);
-        return entryDate >= today;
-      });
-      setTodayAttendance(todayRecords);
     };
     loadData();
-
-    // Réinitialiser les présences du jour toutes les 24 heures
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-    const msUntilMidnight = midnight.getTime() - new Date().getTime();
-    const timer = setTimeout(() => {
-      setTodayAttendance([]);
-    }, msUntilMidnight);
-
-    return () => clearTimeout(timer);
   }, []);
 
   const handleGenerateReport = () => {
@@ -66,11 +46,19 @@ const Reports = () => {
     pdf.text("Rapport de présence", 20, 10);
     
     const formattedData = formatAttendanceData(attendanceData);
-    formattedData.forEach((entry, index) => {
+    const headers = ["Nom d'utilisateur", "Date", "Entrée", "Sortie", "Durée"];
+    
+    pdf.setFontSize(10);
+    pdf.table(20, 20, formattedData.map(entry => {
       const user = users.find(u => u.id === entry.userId);
-      const yPosition = 20 + (index * 10);
-      pdf.text(`${user?.firstName} ${user?.lastName}: ${entry.checkIn} - ${entry.checkOut}`, 20, yPosition);
-    });
+      return [
+        user ? `${user.firstName} ${user.lastName}` : 'Inconnu',
+        entry.date,
+        entry.checkIn,
+        entry.checkOut,
+        entry.duration
+      ];
+    }), headers, { autoSize: true });
 
     pdf.save("rapport_presence.pdf");
     toast.success("Téléchargement du rapport PDF terminé !");
@@ -81,9 +69,11 @@ const Reports = () => {
     const worksheet = XLSX.utils.json_to_sheet(formattedData.map(entry => {
       const user = users.find(u => u.id === entry.userId);
       return {
-        Nom: `${user?.firstName} ${user?.lastName}`,
+        "Nom d'utilisateur": user ? `${user.firstName} ${user.lastName}` : 'Inconnu',
+        "Date": entry.date,
         "Entrée": entry.checkIn,
-        "Sortie": entry.checkOut
+        "Sortie": entry.checkOut,
+        "Durée": entry.duration
       };
     }));
     const workbook = XLSX.utils.book_new();
@@ -96,35 +86,6 @@ const Reports = () => {
     <div className="min-h-screen bg-black text-white">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <Card className="bg-gray-900 border-gold mb-8">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-gold">Présences du jour</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Entrée</TableHead>
-                  <TableHead>Sortie</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {formatAttendanceData(todayAttendance).map((entry, index) => {
-                  const user = users.find(u => u.id === entry.userId);
-                  return (
-                    <TableRow key={index}>
-                      <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
-                      <TableCell>{entry.checkIn}</TableCell>
-                      <TableCell>{entry.checkOut}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
         <Card className="bg-gray-900 border-gold">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-gold">Rapports de présence</CardTitle>
@@ -157,9 +118,11 @@ const Reports = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom</TableHead>
+                    <TableHead>Nom d'utilisateur</TableHead>
+                    <TableHead>Date</TableHead>
                     <TableHead>Entrée</TableHead>
                     <TableHead>Sortie</TableHead>
+                    <TableHead>Durée</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -168,8 +131,10 @@ const Reports = () => {
                     return (
                       <TableRow key={index}>
                         <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
+                        <TableCell>{entry.date}</TableCell>
                         <TableCell>{entry.checkIn}</TableCell>
                         <TableCell>{entry.checkOut}</TableCell>
+                        <TableCell>{entry.duration}</TableCell>
                       </TableRow>
                     );
                   })}
