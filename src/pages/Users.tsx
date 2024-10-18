@@ -7,6 +7,8 @@ import { User } from '../utils/types';
 import Header from '../components/Header';
 import QRCode from 'qrcode';
 import localforage from 'localforage';
+import AdminLogin from '../components/AdminLogin';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 
 const Users = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,6 +19,8 @@ const Users = () => {
     role: '',
   });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showAdminLogin, setShowAdminLogin] = useState(true);
+  const { isAdminLoggedIn, loginAdmin } = useAdminAuth();
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -92,6 +96,50 @@ const Users = () => {
     await localforage.setItem('users', updatedUsers);
     toast.success("QR Code régénéré avec succès !");
   };
+
+  const handleAdminLogin = (success: boolean) => {
+    loginAdmin(success);
+    setShowAdminLogin(false);
+    if (success) {
+      toast.success("Connexion admin réussie. Vous pouvez maintenant gérer les utilisateurs.");
+    }
+  };
+
+  if (showAdminLogin) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <Card className="bg-gray-900 border-gold">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gold">Connexion Admin</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AdminLogin onLogin={handleAdminLogin} />
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
+  if (!isAdminLoggedIn) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <Card className="bg-gray-900 border-gold">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gold">Accès refusé</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Vous n'avez pas les droits d'accès à cette page.</p>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">

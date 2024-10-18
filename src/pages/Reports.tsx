@@ -19,7 +19,7 @@ const Reports = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(true);
   const { isAdminLoggedIn, loginAdmin } = useAdminAuth();
 
   useEffect(() => {
@@ -46,14 +46,10 @@ const Reports = () => {
   };
 
   const handleDownload = (type: 'pdf' | 'excel') => {
-    if (isAdminLoggedIn) {
-      if (type === 'pdf') {
-        handleDownloadPDF();
-      } else {
-        handleDownloadExcel();
-      }
+    if (type === 'pdf') {
+      handleDownloadPDF();
     } else {
-      setShowAdminLogin(true);
+      handleDownloadExcel();
     }
   };
 
@@ -61,7 +57,7 @@ const Reports = () => {
     loginAdmin(success);
     setShowAdminLogin(false);
     if (success) {
-      toast.success("Connexion admin réussie. Vous pouvez maintenant télécharger les rapports.");
+      toast.success("Connexion admin réussie. Vous pouvez maintenant accéder aux rapports.");
     }
   };
 
@@ -107,6 +103,42 @@ const Reports = () => {
     toast.success("Téléchargement du rapport Excel terminé !");
   };
 
+  if (showAdminLogin) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <Card className="bg-gray-900 border-gold">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gold">Connexion Admin</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AdminLogin onLogin={handleAdminLogin} />
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
+  if (!isAdminLoggedIn) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <Card className="bg-gray-900 border-gold">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-gold">Accès refusé</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>Vous n'avez pas les droits d'accès à cette page.</p>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Header />
@@ -116,61 +148,55 @@ const Reports = () => {
             <CardTitle className="text-2xl font-bold text-gold">Rapports de présence</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {showAdminLogin ? (
-              <AdminLogin onLogin={handleAdminLogin} />
-            ) : (
-              <>
-                <div className="flex space-x-4">
-                  <div className="flex flex-col space-y-2">
-                    <label className="text-sm font-medium text-gray-400">Date de début</label>
-                    <CustomDatePicker date={startDate} setDate={setStartDate} />
-                  </div>
-                  <div className="flex flex-col space-y-2">
-                    <label className="text-sm font-medium text-gray-400">Date de fin</label>
-                    <CustomDatePicker date={endDate} setDate={setEndDate} />
-                  </div>
-                </div>
-                <div className="flex space-x-4">
-                  <Button onClick={handleGenerateReport} className="bg-gold text-black hover:bg-yellow-600">
-                    Générer le rapport
-                  </Button>
-                  <Button onClick={() => handleDownload('pdf')} className="bg-blue-500 text-white hover:bg-blue-600">
-                    <FileDown className="mr-2 h-4 w-4" />
-                    Télécharger en PDF
-                  </Button>
-                  <Button onClick={() => handleDownload('excel')} className="bg-green-500 text-white hover:bg-green-600">
-                    <FileDown className="mr-2 h-4 w-4" />
-                    Télécharger en Excel
-                  </Button>
-                </div>
-                {attendanceData.length > 0 && (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nom d'utilisateur</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Entrée</TableHead>
-                        <TableHead>Sortie</TableHead>
-                        <TableHead>Durée</TableHead>
+            <div className="flex space-x-4">
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-medium text-gray-400">Date de début</label>
+                <CustomDatePicker date={startDate} setDate={setStartDate} />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-medium text-gray-400">Date de fin</label>
+                <CustomDatePicker date={endDate} setDate={setEndDate} />
+              </div>
+            </div>
+            <div className="flex space-x-4">
+              <Button onClick={handleGenerateReport} className="bg-gold text-black hover:bg-yellow-600">
+                Générer le rapport
+              </Button>
+              <Button onClick={() => handleDownload('pdf')} className="bg-blue-500 text-white hover:bg-blue-600">
+                <FileDown className="mr-2 h-4 w-4" />
+                Télécharger en PDF
+              </Button>
+              <Button onClick={() => handleDownload('excel')} className="bg-green-500 text-white hover:bg-green-600">
+                <FileDown className="mr-2 h-4 w-4" />
+                Télécharger en Excel
+              </Button>
+            </div>
+            {attendanceData.length > 0 && (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom d'utilisateur</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Entrée</TableHead>
+                    <TableHead>Sortie</TableHead>
+                    <TableHead>Durée</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {formatAttendanceData(attendanceData).map((entry, index) => {
+                    const user = users.find(u => u.id === entry.userId);
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
+                        <TableCell>{entry.date}</TableCell>
+                        <TableCell>{entry.checkIn}</TableCell>
+                        <TableCell>{entry.checkOut}</TableCell>
+                        <TableCell>{entry.duration}</TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {formatAttendanceData(attendanceData).map((entry, index) => {
-                        const user = users.find(u => u.id === entry.userId);
-                        return (
-                          <TableRow key={index}>
-                            <TableCell>{user ? `${user.firstName} ${user.lastName}` : 'Utilisateur inconnu'}</TableCell>
-                            <TableCell>{entry.date}</TableCell>
-                            <TableCell>{entry.checkIn}</TableCell>
-                            <TableCell>{entry.checkOut}</TableCell>
-                            <TableCell>{entry.duration}</TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                )}
-              </>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>

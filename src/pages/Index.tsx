@@ -37,6 +37,14 @@ const Index = () => {
     }
   };
 
+  const handleNavigate = (path: string) => {
+    if (isAdminLoggedIn) {
+      navigate(path);
+    } else {
+      setShowAdminLogin(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Header />
@@ -57,14 +65,14 @@ const Index = () => {
             <Button 
               variant="outline" 
               className="border-gold text-gold hover:bg-gold hover:text-black"
-              onClick={() => navigate('/users')}
+              onClick={() => handleNavigate('/users')}
             >
               Gérer les utilisateurs
             </Button>
             <Button 
               variant="outline" 
               className="border-gold text-gold hover:bg-gold hover:text-black"
-              onClick={() => navigate('/reports')}
+              onClick={() => handleNavigate('/reports')}
             >
               Voir les rapports
             </Button>
