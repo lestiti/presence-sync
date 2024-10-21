@@ -97,20 +97,22 @@ const QRScanner = () => {
 
   return (
     <div className="text-center">
-      <div className="mb-4">
+      <div className="mb-4 flex justify-between items-center">
+        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 mx-auto object-cover" />
         {scanning ? (
           <div className="relative w-64 h-64 mx-auto">
             <video ref={videoRef} className="absolute top-0 left-0 w-full h-full object-cover" />
             <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" style={{ display: 'none' }} />
-            <div className="absolute top-0 left-0 w-full h-full border-2 border-gold"></div>
+            <div className="absolute top-0 left-0 w-full h-full border-2 border-secondary"></div>
           </div>
         ) : (
-          <div className="w-64 h-64 mx-auto bg-gray-700 flex items-center justify-center">
-            <span className="text-gray-500">QR Code Scanner</span>
+          <div className="w-64 h-64 mx-auto bg-primary flex items-center justify-center">
+            <span className="text-muted-foreground">QR Code Scanner</span>
           </div>
         )}
+        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 mx-auto object-cover" />
       </div>
-      <Button onClick={toggleScanning} className="bg-gold text-black hover:bg-yellow-600">
+      <Button onClick={toggleScanning} className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
         {scanning ? 'Arrêter le scan' : 'Scanner QR Code'}
       </Button>
     </div>
