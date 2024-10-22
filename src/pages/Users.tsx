@@ -1,32 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
-import { supabase } from '../lib/supabaseClient';
 import Header from '../components/Header';
 import UserList from '../components/UserList';
 import AddUserForm from '../components/AddUserForm';
-import { useSession } from '@supabase/auth-helpers-react';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
-  const session = useSession();
 
   useEffect(() => {
-    if (!session) {
-      navigate('/login');
-    } else {
-      fetchUsers();
-    }
-  }, [session, navigate]);
+    fetchUsers();
+  }, []);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase.from('users').select('*');
-    if (error) {
-      toast.error('Failed to fetch users');
-    } else {
-      setUsers(data);
-    }
+    // Simulating user fetching without Supabase
+    const mockUsers = [
+      { id: '1', firstName: 'John', lastName: 'Doe', role: 'Admin' },
+      { id: '2', firstName: 'Jane', lastName: 'Smith', role: 'User' },
+      // Add more mock users as needed
+    ];
+    setUsers(mockUsers);
   };
 
   return (

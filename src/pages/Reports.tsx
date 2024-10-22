@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
 import Header from '../components/Header';
 import ReportGenerator from '../components/ReportGenerator';
 import AttendanceTable from '../components/AttendanceTable';
-import { useSession } from '@supabase/auth-helpers-react';
 
 const Reports = () => {
   const [attendanceData, setAttendanceData] = useState([]);
   const navigate = useNavigate();
-  const session = useSession();
 
   useEffect(() => {
-    if (!session) {
-      navigate('/login');
-    } else {
-      fetchAttendanceData();
-    }
-  }, [session, navigate]);
-
-  const fetchAttendanceData = async () => {
-    const { data, error } = await supabase.from('attendance').select('*');
-    if (error) {
-      console.error('Error fetching attendance data:', error);
-    } else {
-      setAttendanceData(data);
-    }
-  };
+    // Simulating data fetching without Supabase
+    const mockData = [
+      { userId: '1', timestamp: new Date(), type: 'check-in' },
+      { userId: '1', timestamp: new Date(Date.now() + 3600000), type: 'check-out' },
+      // Add more mock data as needed
+    ];
+    setAttendanceData(mockData);
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white">

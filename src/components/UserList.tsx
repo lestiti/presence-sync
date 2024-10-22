@@ -1,17 +1,13 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { supabase } from '../lib/supabaseClient';
 
 const UserList = ({ users, onUserDeleted }) => {
   const handleDeleteUser = async (id) => {
-    const { error } = await supabase.from('users').delete().eq('id', id);
-    if (error) {
-      toast.error('Failed to delete user');
-    } else {
-      toast.success("User deleted successfully!");
-      onUserDeleted();
-    }
+    // Simulating user deletion without Supabase
+    console.log('Deleting user:', id);
+    toast.success("User deleted successfully!");
+    onUserDeleted();
   };
 
   return (

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { supabase } from '../lib/supabaseClient';
 
 const AddUserForm = ({ onUserAdded }) => {
   const [newUser, setNewUser] = useState({ firstName: '', lastName: '', phoneNumber: '', role: '' });
@@ -14,14 +13,11 @@ const AddUserForm = ({ onUserAdded }) => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    const { data, error } = await supabase.from('users').insert([newUser]);
-    if (error) {
-      toast.error('Failed to add user');
-    } else {
-      toast.success("User added successfully!");
-      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
-      onUserAdded();
-    }
+    // Simulating user addition without Supabase
+    console.log('Adding user:', newUser);
+    toast.success("User added successfully!");
+    setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
+    onUserAdded();
   };
 
   return (

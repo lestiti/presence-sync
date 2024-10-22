@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import CustomDatePicker from './CustomDatePicker';
 import { formatAttendanceData } from '../utils/attendanceUtils';
-import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const ReportGenerator = ({ attendanceData }) => {
   const [startDate, setStartDate] = useState(new Date());
@@ -28,7 +28,7 @@ const ReportGenerator = ({ attendanceData }) => {
     if (type === 'pdf') {
       const pdf = new jsPDF();
       pdf.text("Attendance Report", 20, 10);
-      pdf.autoTable({
+      (pdf as any).autoTable({
         head: [['User ID', 'Date', 'Check In', 'Check Out', 'Duration']],
         body: formattedData.map(entry => [entry.userId, entry.date, entry.checkIn, entry.checkOut, entry.duration]),
         startY: 20
