@@ -10,6 +10,7 @@ const AttendanceTable = ({ attendanceData }) => {
       <TableHeader>
         <TableRow>
           <TableHead>User ID</TableHead>
+          <TableHead>Function</TableHead>
           <TableHead>Date</TableHead>
           <TableHead>Check In</TableHead>
           <TableHead>Check Out</TableHead>
@@ -20,6 +21,7 @@ const AttendanceTable = ({ attendanceData }) => {
         {formattedData.map((entry, index) => (
           <TableRow key={index}>
             <TableCell>{entry.userId}</TableCell>
+            <TableCell>{entry.userRole}</TableCell>
             <TableCell>{entry.date}</TableCell>
             <TableCell>{entry.checkIn}</TableCell>
             <TableCell>{entry.checkOut}</TableCell>

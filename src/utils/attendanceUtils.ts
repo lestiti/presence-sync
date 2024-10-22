@@ -3,6 +3,7 @@ import { AttendanceRecord } from '../utils/types';
 export const formatAttendanceData = (data: AttendanceRecord[]) => {
   const formattedData: {
     userId: string;
+    userRole: string;
     date: string;
     checkIn: string;
     checkOut: string;
@@ -36,6 +37,7 @@ export const formatAttendanceData = (data: AttendanceRecord[]) => {
 
       formattedData.push({
         userId: checkIn.userId,
+        userRole: checkIn.userRole || 'N/A', // Add this line
         date: checkInTime.toLocaleDateString(),
         checkIn: checkInTime.toLocaleTimeString(),
         checkOut: checkOutTime ? checkOutTime.toLocaleTimeString() : '-',

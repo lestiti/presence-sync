@@ -11,8 +11,10 @@ const Reports = () => {
   useEffect(() => {
     // Simulating data fetching without Supabase
     const mockData = [
-      { userId: '1', timestamp: new Date(), type: 'check-in' },
-      { userId: '1', timestamp: new Date(Date.now() + 3600000), type: 'check-out' },
+      { userId: '1', timestamp: new Date(), type: 'check-in', userRole: 'Manager' },
+      { userId: '1', timestamp: new Date(Date.now() + 3600000), type: 'check-out', userRole: 'Manager' },
+      { userId: '2', timestamp: new Date(), type: 'check-in', userRole: 'Employee' },
+      { userId: '2', timestamp: new Date(Date.now() + 3600000), type: 'check-out', userRole: 'Employee' },
       // Add more mock data as needed
     ];
     setAttendanceData(mockData);
