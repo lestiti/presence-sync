@@ -5,6 +5,7 @@ import CustomDatePicker from './CustomDatePicker';
 import { formatAttendanceData } from '../utils/attendanceUtils';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const ReportGenerator = ({ attendanceData }) => {
   const [startDate, setStartDate] = useState(new Date());
@@ -27,7 +28,11 @@ const ReportGenerator = ({ attendanceData }) => {
     if (type === 'pdf') {
       const pdf = new jsPDF();
       pdf.text("Attendance Report", 20, 10);
-      pdf.table(20, 20, formattedData, ['User ID', 'Date', 'Check In', 'Check Out', 'Duration']);
+      pdf.autoTable({
+        head: [['User ID', 'Date', 'Check In', 'Check Out', 'Duration']],
+        body: formattedData.map(entry => [entry.userId, entry.date, entry.checkIn, entry.checkOut, entry.duration]),
+        startY: 20
+      });
       pdf.save("attendance_report.pdf");
     } else if (type === 'excel') {
       const worksheet = XLSX.utils.json_to_sheet(formattedData);
