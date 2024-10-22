@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { User } from '../utils/types';
 import Header from '../components/Header';
 import QRCode from 'qrcode';
-import localforage from 'localforage';
+import axios from 'axios';
 import AdminLogin from '../components/AdminLogin';
 import { useAdminAuth } from '../hooks/useAdminAuth';
 
@@ -24,9 +24,12 @@ const Users = () => {
 
   useEffect(() => {
     const loadUsers = async () => {
-      const storedUsers = await localforage.getItem<User[]>('users');
-      if (storedUsers) {
-        setUsers(storedUsers);
+      try {
+        const response = await axios.get('/users');
+        setUsers(response.data);
+      } catch (error) {
+        console.error('Error loading users:', error);
+        toast.error('Failed to load users');
       }
     };
     loadUsers();
@@ -58,25 +61,34 @@ const Users = () => {
   };
 
   const handleAddUser = async () => {
-    const userId = Date.now().toString();
-    const qrCode = await generateQRCode(userId);
-    const user: User = {
-      ...newUser,
-      id: userId,
-      qrCode,
-    };
-    const updatedUsers = [...users, user];
-    setUsers(updatedUsers);
-    await localforage.setItem('users', updatedUsers);
-    setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
-    toast.success("Utilisateur ajouté avec succès !");
+    try {
+      const userId = Date.now().toString();
+      const qrCode = await generateQRCode(userId);
+      const user: User = {
+        ...newUser,
+        id: userId,
+        qrCode,
+      };
+      const response = await axios.post('/users', user);
+      setUsers([...users, response.data]);
+      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
+      toast.success("Utilisateur ajouté avec succès !");
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast.error('Failed to add user');
+    }
   };
 
   const handleDeleteUser = async (id: string) => {
-    const updatedUsers = users.filter(user => user.id !== id);
-    setUsers(updatedUsers);
-    await localforage.setItem('users', updatedUsers);
-    toast.success("Utilisateur supprimé avec succès !");
+    try {
+      await axios.delete(`/users/${id}`);
+      const updatedUsers = users.filter(user => user.id !== id);
+      setUsers(updatedUsers);
+      toast.success("Utilisateur supprimé avec succès !");
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Failed to delete user');
+    }
   };
 
   const handleDownloadQR = (user: User) => {
@@ -93,7 +105,7 @@ const Users = () => {
     const newQRCode = await generateQRCode(user.id);
     const updatedUsers = users.map(u => u.id === user.id ? { ...u, qrCode: newQRCode } : u);
     setUsers(updatedUsers);
-    await localforage.setItem('users', updatedUsers);
+    await axios.put(`/users/${user.id}`, { qrCode: newQRCode });
     toast.success("QR Code régénéré avec succès !");
   };
 
