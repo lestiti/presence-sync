@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
-import localforage from 'localforage';
-import { AttendanceRecord, User } from '../utils/types';
+import { supabase } from '../lib/supabaseClient';
 import { getWelcomeMessage, getExitMessage } from '../utils/messages';
 
 const QRScanner = () => {
@@ -42,24 +41,35 @@ const QRScanner = () => {
   };
 
   const handleScan = async (qrCode: string) => {
-    const users = await localforage.getItem<User[]>('users') || [];
-    const user = users.find(u => u.id === qrCode);
-    if (!user) {
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select()
+      .eq('id', qrCode)
+      .single();
+
+    if (userError || !user) {
       toast.error("Utilisateur non trouvé");
       return;
     }
 
-    const attendanceRecords = await localforage.getItem<AttendanceRecord[]>('attendance') || [];
-    const lastRecord = attendanceRecords.filter(record => record.userId === qrCode).pop();
+    const { data: lastRecord, error: recordError } = await supabase
+      .from('attendance')
+      .select()
+      .eq('userId', qrCode)
+      .order('timestamp', { ascending: false })
+      .limit(1)
+      .single();
+
     const newType = lastRecord?.type === 'check-in' ? 'check-out' : 'check-in';
 
-    const newRecord: AttendanceRecord = {
-      userId: qrCode,
-      timestamp: new Date(),
-      type: newType
-    };
-    attendanceRecords.push(newRecord);
-    await localforage.setItem('attendance', attendanceRecords);
+    const { error: insertError } = await supabase
+      .from('attendance')
+      .insert({ userId: qrCode, timestamp: new Date(), type: newType });
+
+    if (insertError) {
+      toast.error("Échec de l'enregistrement de la présence");
+      return;
+    }
 
     const message = newType === 'check-in' 
       ? getWelcomeMessage(`${user.firstName} ${user.lastName}`)
