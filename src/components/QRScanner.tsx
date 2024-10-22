@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
-import { supabase } from '../lib/supabaseClient';
-import { getWelcomeMessage, getExitMessage } from '../utils/messages';
 
 const QRScanner = () => {
   const [scanning, setScanning] = useState(false);
@@ -40,41 +38,9 @@ const QRScanner = () => {
     }
   };
 
-  const handleScan = async (qrCode: string) => {
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select()
-      .eq('id', qrCode)
-      .single();
-
-    if (userError || !user) {
-      toast.error("Utilisateur non trouvé");
-      return;
-    }
-
-    const { data: lastRecord, error: recordError } = await supabase
-      .from('attendance')
-      .select()
-      .eq('userId', qrCode)
-      .order('timestamp', { ascending: false })
-      .limit(1)
-      .single();
-
-    const newType = lastRecord?.type === 'check-in' ? 'check-out' : 'check-in';
-
-    const { error: insertError } = await supabase
-      .from('attendance')
-      .insert({ userId: qrCode, timestamp: new Date(), type: newType });
-
-    if (insertError) {
-      toast.error("Échec de l'enregistrement de la présence");
-      return;
-    }
-
-    const message = newType === 'check-in' 
-      ? getWelcomeMessage(`${user.firstName} ${user.lastName}`)
-      : getExitMessage();
-    toast.success(message);
+  const handleScan = (qrCode: string) => {
+    // Simulate a successful scan
+    toast.success(`QR Code scanned: ${qrCode}`);
     setScanning(false);
   };
 

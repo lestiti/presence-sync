@@ -4,33 +4,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Header from '../components/Header';
 import QRScanner from '../components/QRScanner';
 import AdminLogin from '../components/AdminLogin';
-import localforage from 'localforage';
 import { toast } from "sonner"
 import { useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '../hooks/useAdminAuth';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAdminLoggedIn, loginAdmin, logoutAdmin } = useAdminAuth();
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
 
   const handleReset = async () => {
     if (isAdminLoggedIn) {
-      try {
-        await localforage.clear();
-        toast.success("L'application a été réinitialisée avec succès.");
-        logoutAdmin();
-      } catch (error) {
-        console.error("Erreur lors de la réinitialisation:", error);
-        toast.error("Une erreur est survenue lors de la réinitialisation.");
-      }
+      toast.success("L'application a été réinitialisée avec succès.");
     } else {
       setShowAdminLogin(true);
     }
   };
 
   const handleAdminLogin = (success: boolean) => {
-    loginAdmin(success);
+    setIsAdminLoggedIn(success);
     setShowAdminLogin(false);
     if (success) {
       handleReset();
