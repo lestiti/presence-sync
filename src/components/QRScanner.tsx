@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
+import { generateMonthlyReport } from '../utils/reportUtils';
 
-const QRScanner = () => {
+const QRScanner = ({ isAdmin }) => {
   const [scanning, setScanning] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,9 +39,18 @@ const QRScanner = () => {
     }
   };
 
-  const handleScan = (qrCode: string) => {
-    // Simulate a successful scan
-    toast.success(`QR Code scanned: ${qrCode}`);
+  const handleScan = async (qrCode: string) => {
+    const timestamp = new Date().toISOString();
+    if (isAdmin && qrCode === 'ADMIN_QR_CODE') {
+      const report = await generateMonthlyReport();
+      // Ici, vous devriez implémenter la logique pour télécharger le rapport
+      console.log('Rapport mensuel généré:', report);
+      toast.success('Rapport mensuel téléchargé');
+    } else {
+      // Simuler l'enregistrement de l'horodatage
+      console.log(`QR Code scanné: ${qrCode}, Horodatage: ${timestamp}`);
+      toast.success(`Présence enregistrée pour l'utilisateur ${qrCode}`);
+    }
     setScanning(false);
   };
 

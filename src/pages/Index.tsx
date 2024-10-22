@@ -14,6 +14,9 @@ const Index = () => {
 
   const handleReset = async () => {
     if (isAdminLoggedIn) {
+      // Ici, nous simulons la réinitialisation de l'application
+      // Dans une vraie application, vous devriez appeler une API pour réinitialiser les données
+      localStorage.clear();
       toast.success("L'application a été réinitialisée avec succès.");
     } else {
       setShowAdminLogin(true);
@@ -49,7 +52,7 @@ const Index = () => {
             {showAdminLogin ? (
               <AdminLogin onLogin={handleAdminLogin} />
             ) : (
-              <QRScanner />
+              <QRScanner isAdmin={isAdminLoggedIn} />
             )}
           </CardContent>
           <CardFooter className="flex justify-between">
