@@ -2,10 +2,8 @@ const CACHE_NAME = 'fpvm-checking-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/src/main.tsx',
-  '/src/App.tsx',
-  '/src/index.css',
-  // Add other important assets here
+  '/manifest.json',
+  '/fpvm-logo.png'
 ];
 
 self.addEventListener('install', (event) => {

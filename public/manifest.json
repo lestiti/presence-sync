@@ -1,0 +1,16 @@
+{
+  "name": "FPVM Checking",
+  "short_name": "FPVM Check",
+  "description": "Application de pointage pour FPVM",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#312C51",
+  "theme_color": "#4B426D",
+  "icons": [
+    {
+      "src": "/fpvm-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
