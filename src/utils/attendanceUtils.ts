@@ -13,7 +13,8 @@ export const saveAttendanceRecord = (userId: string, type: 'check-in' | 'check-o
     userId,
     timestamp: new Date(),
     type,
-    userRole: user.role
+    userRole: user.role,
+    userName: `${user.firstName} ${user.lastName}`
   };
 
   attendance.push(newRecord);
@@ -28,6 +29,7 @@ export const getAttendanceRecords = (): AttendanceRecord[] => {
 export const formatAttendanceData = (data: AttendanceRecord[]) => {
   const formattedData: {
     userId: string;
+    userName: string;
     userRole: string;
     date: string;
     checkIn: string;
@@ -62,6 +64,7 @@ export const formatAttendanceData = (data: AttendanceRecord[]) => {
 
       formattedData.push({
         userId: checkIn.userId,
+        userName: checkIn.userName || 'N/A',
         userRole: checkIn.userRole || 'N/A',
         date: checkInTime.toLocaleDateString(),
         checkIn: checkInTime.toLocaleTimeString(),

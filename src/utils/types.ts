@@ -9,7 +9,8 @@ export interface User {
 
 export interface AttendanceRecord {
   userId: string;
+  userName?: string;
   timestamp: Date;
   type: 'check-in' | 'check-out';
-  userRole: string; // Add this line
+  userRole: string;
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAttendanceRecords } from '../utils/attendanceUtils';
-import { formatAttendanceData } from '../utils/attendanceUtils';
 
 const AttendanceTable = () => {
   const [attendanceData, setAttendanceData] = useState([]);
@@ -19,7 +18,7 @@ const AttendanceTable = () => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>ID Utilisateur</TableHead>
+          <TableHead>Nom et Prénom</TableHead>
           <TableHead>Fonction</TableHead>
           <TableHead>Date et Heure</TableHead>
           <TableHead>Type</TableHead>
@@ -28,7 +27,7 @@ const AttendanceTable = () => {
       <TableBody>
         {attendanceData.map((entry, index) => (
           <TableRow key={index}>
-            <TableCell>{entry.userId}</TableCell>
+            <TableCell>{entry.userName || 'N/A'}</TableCell>
             <TableCell>{entry.userRole}</TableCell>
             <TableCell>{formatDate(entry.timestamp)}</TableCell>
             <TableCell>{entry.type === 'check-in' ? 'Entrée' : 'Sortie'}</TableCell>
