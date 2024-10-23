@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import ReportGenerator from '../components/ReportGenerator';
 import AttendanceTable from '../components/AttendanceTable';
+import { getAttendanceRecords } from '../utils/attendanceUtils';
 
 const Reports = () => {
   const [attendanceData, setAttendanceData] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulating data fetching without Supabase
-    const mockData = [
-      { userId: '1', timestamp: new Date(), type: 'check-in', userRole: 'Manager' },
-      { userId: '1', timestamp: new Date(Date.now() + 3600000), type: 'check-out', userRole: 'Manager' },
-      { userId: '2', timestamp: new Date(), type: 'check-in', userRole: 'Employee' },
-      { userId: '2', timestamp: new Date(Date.now() + 3600000), type: 'check-out', userRole: 'Employee' },
-      // Add more mock data as needed
-    ];
-    setAttendanceData(mockData);
+    const records = getAttendanceRecords();
+    setAttendanceData(records);
   }, []);
 
   return (
@@ -25,7 +17,7 @@ const Reports = () => {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <ReportGenerator attendanceData={attendanceData} />
-        <AttendanceTable attendanceData={attendanceData} />
+        <AttendanceTable />
       </main>
     </div>
   );
