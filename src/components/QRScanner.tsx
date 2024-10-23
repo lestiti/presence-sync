@@ -1,82 +1,53 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
+import React, { useRef, useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
 import jsQR from "jsqr";
-import { saveAttendanceRecord } from '../utils/attendanceUtils';
+import { processQRCode } from '../utils/qrCodeUtils';
 
-const QRScanner = ({ isAdmin }) => {
+const QRScanner = ({ isAdmin = false }) => {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const [scanning, setScanning] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (scanning) {
-      startScanning();
-    } else {
-      stopScanning();
-    }
-  }, [scanning]);
-
-  const startScanning = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-        requestAnimationFrame(tick);
-      }
-    } catch (err) {
-      console.error("Erreur lors de l'accès à la caméra:", err);
-      toast.error("Impossible d'accéder à la caméra");
-      setScanning(false);
-    }
-  };
-
-  const stopScanning = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach(track => track.stop());
-    }
-  };
-
-  const handleScan = async (qrCode: string) => {
-    try {
-      const record = saveAttendanceRecord(qrCode, 'check-in');
-      toast.success(`Présence enregistrée avec succès`);
-    } catch (error) {
-      toast.error("Erreur lors de l'enregistrement de la présence");
-      console.error('Erreur scan:', error);
-    }
-    setScanning(false);
-  };
-
-  const tick = () => {
-    if (videoRef.current && canvasRef.current) {
-      if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-        canvasRef.current.height = videoRef.current.videoHeight;
-        canvasRef.current.width = videoRef.current.videoWidth;
-        const context = canvasRef.current.getContext('2d');
-        if (context) {
-          context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-          const imageData = context.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
-          });
-          if (code) {
-            handleScan(code.data);
-            return;
-          }
-        }
-      }
-      if (scanning) {
-        requestAnimationFrame(tick);
-      }
-    }
-  };
 
   const toggleScanning = () => {
-    setScanning(!scanning);
+    setScanning(prev => !prev);
   };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+
+    if (scanning) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+          video.play();
+          requestAnimationFrame(tick);
+        });
+    } else {
+      const stream = video.srcObject;
+      if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+      video.srcObject = null;
+    }
+
+    const tick = () => {
+      if (scanning) {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, canvas.width, canvas.height);
+          if (code) {
+            processQRCode(code.data);
+            toggleScanning();
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+    };
+  }, [scanning]);
 
   return (
     <div className="text-center p-4">
