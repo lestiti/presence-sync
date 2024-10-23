@@ -6,7 +6,6 @@ import QRScanner from '../components/QRScanner';
 import AdminLogin from '../components/AdminLogin';
 import { toast } from "sonner"
 import { useNavigate } from 'react-router-dom';
-import { clearLocalStorage } from '../utils/localStorage';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -16,7 +15,12 @@ const Index = () => {
   const handleReset = () => {
     if (isAdminLoggedIn) {
       try {
-        clearLocalStorage();
+        // Effacer toutes les données stockées
+        localStorage.clear();
+        // Réinitialiser le stockage
+        localStorage.setItem('users', JSON.stringify([]));
+        localStorage.setItem('attendance', JSON.stringify([]));
+        
         toast.success("L'application a été réinitialisée avec succès");
         // Rediriger vers la page de connexion après la réinitialisation
         navigate('/login');
