@@ -81,7 +81,11 @@ const QRScanner = ({ isAdmin }) => {
   return (
     <div className="text-center p-4">
       <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 object-cover" />
+        {/* Logo gauche */}
+        <div className="rounded-full overflow-hidden w-16 h-16 border-2 border-secondary flex items-center justify-center bg-white">
+          <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-14 h-14 object-contain" />
+        </div>
+        
         <div className="relative w-full max-w-[300px] md:max-w-[400px] aspect-square mx-auto">
           {scanning ? (
             <>
@@ -102,7 +106,11 @@ const QRScanner = ({ isAdmin }) => {
             </div>
           )}
         </div>
-        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 object-cover" />
+
+        {/* Logo droite */}
+        <div className="rounded-full overflow-hidden w-16 h-16 border-2 border-secondary flex items-center justify-center bg-white">
+          <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-14 h-14 object-contain" />
+        </div>
       </div>
       <Button 
         onClick={toggleScanning} 
