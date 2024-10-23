@@ -13,10 +13,16 @@ const Index = () => {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
 
-  const handleReset = async () => {
+  const handleReset = () => {
     if (isAdminLoggedIn) {
-      clearLocalStorage();
-      toast.success("L'application a été réinitialisée avec succès.");
+      try {
+        clearLocalStorage();
+        toast.success("L'application a été réinitialisée avec succès");
+        // Rediriger vers la page de connexion après la réinitialisation
+        navigate('/login');
+      } catch (error) {
+        toast.error("Erreur lors de la réinitialisation de l'application");
+      }
     } else {
       setShowAdminLogin(true);
     }
@@ -25,7 +31,7 @@ const Index = () => {
   const handleAdminLogin = (success: boolean) => {
     setIsAdminLoggedIn(success);
     setShowAdminLogin(false);
-    if (success) {
+    if (success && showAdminLogin) {
       handleReset();
     }
   };
@@ -69,7 +75,11 @@ const Index = () => {
             >
               Voir les rapports
             </Button>
-            <Button onClick={handleReset} variant="destructive" className="bg-red-600 hover:bg-red-700 text-white">
+            <Button 
+              onClick={handleReset} 
+              variant="destructive" 
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
               Réinitialiser l'application
             </Button>
           </CardFooter>
