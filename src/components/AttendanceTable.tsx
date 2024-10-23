@@ -1,31 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getAttendanceRecords } from '../utils/attendanceUtils';
 import { formatAttendanceData } from '../utils/attendanceUtils';
 
-const AttendanceTable = ({ attendanceData }) => {
-  const formattedData = formatAttendanceData(attendanceData);
+const AttendanceTable = () => {
+  const [attendanceData, setAttendanceData] = useState([]);
+
+  useEffect(() => {
+    const records = getAttendanceRecords();
+    setAttendanceData(records);
+  }, []);
+
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleString();
+  };
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>User ID</TableHead>
-          <TableHead>Function</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Check In</TableHead>
-          <TableHead>Check Out</TableHead>
-          <TableHead>Duration</TableHead>
+          <TableHead>ID Utilisateur</TableHead>
+          <TableHead>Fonction</TableHead>
+          <TableHead>Date et Heure</TableHead>
+          <TableHead>Type</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {formattedData.map((entry, index) => (
+        {attendanceData.map((entry, index) => (
           <TableRow key={index}>
             <TableCell>{entry.userId}</TableCell>
             <TableCell>{entry.userRole}</TableCell>
-            <TableCell>{entry.date}</TableCell>
-            <TableCell>{entry.checkIn}</TableCell>
-            <TableCell>{entry.checkOut}</TableCell>
-            <TableCell>{entry.duration}</TableCell>
+            <TableCell>{formatDate(entry.timestamp)}</TableCell>
+            <TableCell>{entry.type === 'check-in' ? 'Entrée' : 'Sortie'}</TableCell>
           </TableRow>
         ))}
       </TableBody>

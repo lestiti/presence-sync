@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
-import { generateMonthlyReport } from '../utils/reportUtils';
+import { saveAttendanceRecord } from '../utils/attendanceUtils';
 
 const QRScanner = ({ isAdmin }) => {
   const [scanning, setScanning] = useState(false);
@@ -40,16 +40,12 @@ const QRScanner = ({ isAdmin }) => {
   };
 
   const handleScan = async (qrCode: string) => {
-    const timestamp = new Date().toISOString();
-    if (isAdmin && qrCode === 'ADMIN_QR_CODE') {
-      const report = await generateMonthlyReport();
-      // Ici, vous devriez implémenter la logique pour télécharger le rapport
-      console.log('Rapport mensuel généré:', report);
-      toast.success('Rapport mensuel téléchargé');
-    } else {
-      // Simuler l'enregistrement de l'horodatage
-      console.log(`QR Code scanné: ${qrCode}, Horodatage: ${timestamp}`);
-      toast.success(`Présence enregistrée pour l'utilisateur ${qrCode}`);
+    try {
+      const record = saveAttendanceRecord(qrCode, 'check-in');
+      toast.success(`Présence enregistrée avec succès`);
+    } catch (error) {
+      toast.error("Erreur lors de l'enregistrement de la présence");
+      console.error('Erreur scan:', error);
     }
     setScanning(false);
   };
@@ -67,13 +63,14 @@ const QRScanner = ({ isAdmin }) => {
             inversionAttempts: "dontInvert",
           });
           if (code) {
-            console.log("QR Code détecté", code.data);
             handleScan(code.data);
             return;
           }
         }
       }
-      requestAnimationFrame(tick);
+      if (scanning) {
+        requestAnimationFrame(tick);
+      }
     }
   };
 
