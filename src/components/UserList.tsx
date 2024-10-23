@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { generateQRCode } from '../utils/qrCodeUtils';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -53,33 +54,37 @@ const UserList = () => {
         <CardTitle>Liste des utilisateurs</CardTitle>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-4">
-          {users.map(user => (
-            <li key={user.id} className="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
-              <div>
-                <p className="font-bold">{user.firstName} {user.lastName}</p>
-                <p className="text-sm text-gray-600">{user.email}</p>
-                <p className="text-sm text-gray-600">{user.role}</p>
-                <p className="text-sm text-gray-600">{user.phoneNumber}</p>
-              </div>
-              <div className="space-x-2">
-                <Button 
-                  onClick={() => handleDownloadQR(user.id)} 
-                  disabled={generatingQR === user.id}
-                  variant="outline"
-                >
-                  {generatingQR === user.id ? 'Génération...' : 'Télécharger QR'}
-                </Button>
-                <Button 
-                  onClick={() => handleDeleteUser(user.id)} 
-                  variant="destructive"
-                >
-                  Supprimer
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <ScrollArea className="h-[60vh]">
+          <ul className="space-y-4">
+            {users.map(user => (
+              <li key={user.id} className="flex flex-col md:flex-row justify-between items-start md:items-center bg-gray-100 p-4 rounded-lg gap-4">
+                <div>
+                  <p className="font-bold">{user.firstName} {user.lastName}</p>
+                  <p className="text-sm text-gray-600">{user.email}</p>
+                  <p className="text-sm text-gray-600">{user.role}</p>
+                  <p className="text-sm text-gray-600">{user.phoneNumber}</p>
+                </div>
+                <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                  <Button 
+                    onClick={() => handleDownloadQR(user.id)} 
+                    disabled={generatingQR === user.id}
+                    variant="outline"
+                    className="w-full md:w-auto"
+                  >
+                    {generatingQR === user.id ? 'Génération...' : 'Télécharger QR'}
+                  </Button>
+                  <Button 
+                    onClick={() => handleDeleteUser(user.id)} 
+                    variant="destructive"
+                    className="w-full md:w-auto"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

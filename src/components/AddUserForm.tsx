@@ -22,13 +22,11 @@ const AddUserForm = ({ onUserAdded }) => {
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
-      // Simuler l'ajout d'un utilisateur avec un ID unique
       const userWithId = {
         ...newUser,
-        id: Date.now().toString(), // Utiliser timestamp comme ID temporaire
+        id: Date.now().toString(),
       };
       
-      // Stocker l'utilisateur dans le localStorage
       const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
       const updatedUsers = [...existingUsers, userWithId];
       localStorage.setItem('users', JSON.stringify(updatedUsers));
@@ -49,65 +47,67 @@ const AddUserForm = ({ onUserAdded }) => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleAddUser} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">Prénom</Label>
-            <Input
-              id="firstName"
-              placeholder="Entrez le prénom"
-              name="firstName"
-              value={newUser.firstName}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="lastName">Nom</Label>
-            <Input
-              id="lastName"
-              placeholder="Entrez le nom"
-              name="lastName"
-              value={newUser.lastName}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Entrez l'email"
-              name="email"
-              value={newUser.email}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Numéro de téléphone</Label>
-            <Input
-              id="phoneNumber"
-              placeholder="Entrez le numéro de téléphone"
-              name="phoneNumber"
-              value={newUser.phoneNumber}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="role">Fonction</Label>
-            <Input
-              id="role"
-              placeholder="Entrez la fonction"
-              name="role"
-              value={newUser.role}
-              onChange={handleInputChange}
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Prénom</Label>
+              <Input
+                id="firstName"
+                placeholder="Entrez le prénom"
+                name="firstName"
+                value={newUser.firstName}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Nom</Label>
+              <Input
+                id="lastName"
+                placeholder="Entrez le nom"
+                name="lastName"
+                value={newUser.lastName}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Entrez l'email"
+                name="email"
+                value={newUser.email}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">Numéro de téléphone</Label>
+              <Input
+                id="phoneNumber"
+                placeholder="Entrez le numéro de téléphone"
+                name="phoneNumber"
+                value={newUser.phoneNumber}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="role">Fonction</Label>
+              <Input
+                id="role"
+                placeholder="Entrez la fonction"
+                name="role"
+                value={newUser.role}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
           </div>
           
           <Button type="submit" className="w-full">

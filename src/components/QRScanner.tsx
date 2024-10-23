@@ -79,23 +79,35 @@ const QRScanner = ({ isAdmin }) => {
   };
 
   return (
-    <div className="text-center">
-      <div className="mb-4 flex justify-between items-center">
-        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 mx-auto object-cover" />
-        {scanning ? (
-          <div className="relative w-64 h-64 mx-auto">
-            <video ref={videoRef} className="absolute top-0 left-0 w-full h-full object-cover" />
-            <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full" style={{ display: 'none' }} />
-            <div className="absolute top-0 left-0 w-full h-full border-2 border-secondary"></div>
-          </div>
-        ) : (
-          <div className="w-64 h-64 mx-auto bg-primary flex items-center justify-center">
-            <span className="text-muted-foreground">QR Code Scanner</span>
-          </div>
-        )}
-        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 mx-auto object-cover" />
+    <div className="text-center p-4">
+      <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 object-cover" />
+        <div className="relative w-full max-w-[300px] md:max-w-[400px] aspect-square mx-auto">
+          {scanning ? (
+            <>
+              <video 
+                ref={videoRef} 
+                className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
+              />
+              <canvas 
+                ref={canvasRef} 
+                className="absolute top-0 left-0 w-full h-full" 
+                style={{ display: 'none' }} 
+              />
+              <div className="absolute top-0 left-0 w-full h-full border-2 border-secondary rounded-lg"></div>
+            </>
+          ) : (
+            <div className="w-full h-full bg-primary flex items-center justify-center rounded-lg">
+              <span className="text-muted-foreground">QR Code Scanner</span>
+            </div>
+          )}
+        </div>
+        <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16 object-cover" />
       </div>
-      <Button onClick={toggleScanning} className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
+      <Button 
+        onClick={toggleScanning} 
+        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 w-full md:w-auto"
+      >
         {scanning ? 'Arrêter le scan' : 'Scanner QR Code'}
       </Button>
     </div>
