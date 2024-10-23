@@ -1,3 +1,4 @@
+import QRCode from 'qrcode';
 import { toast } from "sonner";
 import { saveAttendanceRecord } from './attendanceUtils';
 
