@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Header from '../components/Header';
 import QRScanner from '../components/QRScanner';
 import AdminLogin from '../components/AdminLogin';
+import DataBackupRestore from '../components/DataBackupRestore';
 import { toast } from "sonner"
 import { useNavigate } from 'react-router-dom';
 
@@ -15,14 +16,11 @@ const Index = () => {
   const handleReset = () => {
     if (isAdminLoggedIn) {
       try {
-        // Effacer toutes les données stockées
         localStorage.clear();
-        // Réinitialiser le stockage
         localStorage.setItem('users', JSON.stringify([]));
         localStorage.setItem('attendance', JSON.stringify([]));
         
         toast.success("L'application a été réinitialisée avec succès");
-        // Rediriger vers la page de connexion après la réinitialisation
         navigate('/login');
       } catch (error) {
         toast.error("Erreur lors de la réinitialisation de l'application");
@@ -61,7 +59,10 @@ const Index = () => {
             {showAdminLogin ? (
               <AdminLogin onLogin={handleAdminLogin} />
             ) : (
-              <QRScanner isAdmin={isAdminLoggedIn} />
+              <>
+                <QRScanner isAdmin={isAdminLoggedIn} />
+                {isAdminLoggedIn && <DataBackupRestore />}
+              </>
             )}
           </CardContent>
           <CardFooter className="flex justify-between">
