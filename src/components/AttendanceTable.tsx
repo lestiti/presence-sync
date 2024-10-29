@@ -6,6 +6,7 @@ interface GroupedAttendance {
   userId: string;
   userName: string;
   userRole: string;
+  date: string;
   checkIn: Date | null;
   checkOut: Date | null;
 }
