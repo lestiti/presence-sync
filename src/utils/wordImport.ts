@@ -5,18 +5,24 @@ import { generateQRCode } from './qrCodeUtils';
 import { toast } from "sonner";
 
 const extractUserInfo = (text: string): Partial<User>[] => {
-  // Format attendu (FR): "Nom: Dupont, Prénom: Jean, Téléphone: 0123456789, Fonction: Manager"
-  // Format attendu (MG): "Anarana: Dupont, Fanampiny: Jean, Tel: 0123456789, Asa: Manager"
-  console.log('Texte extrait du fichier:', text); // Log du texte brut
+  console.log('Texte brut extrait:', text);
   
   const users: Partial<User>[] = [];
   const lines = text.split('\n').filter(line => line.trim());
-  console.log('Nombre de lignes trouvées:', lines.length); // Log du nombre de lignes
-
+  
   for (const line of lines) {
     try {
-      console.log('Traitement de la ligne:', line); // Log de chaque ligne
-      const parts = line.split(',').map(part => part.trim());
+      // Nettoyage et normalisation de la ligne
+      const cleanLine = line.trim().replace(/\s+/g, ' ');
+      console.log('Traitement de la ligne:', cleanLine);
+      
+      // Vérification du format attendu
+      if (!cleanLine.includes('Nom:') || !cleanLine.includes('Prénom:')) {
+        console.log('Format invalide, ligne ignorée:', cleanLine);
+        continue;
+      }
+
+      const parts = cleanLine.split(',').map(part => part.trim());
       const user: Partial<User> = {
         id: uuidv4(),
         firstName: '',
@@ -26,37 +32,33 @@ const extractUserInfo = (text: string): Partial<User>[] => {
       };
 
       for (const part of parts) {
-        console.log('Analyse de la partie:', part); // Log de chaque partie
         const [key, value] = part.split(':').map(s => s.trim());
+        
         if (!key || !value) {
-          console.log('Format invalide pour la partie:', part);
+          console.log('Partie invalide ignorée:', part);
           continue;
         }
 
+        console.log('Traitement de la partie:', key, '=', value);
+
         switch (key.toLowerCase()) {
           case 'nom':
-          case 'anarana':
             user.lastName = value;
             break;
           case 'prénom':
-          case 'fanampiny':
             user.firstName = value;
             break;
           case 'téléphone':
-          case 'tel':
             user.phoneNumber = value;
             break;
           case 'fonction':
-          case 'asa':
             user.role = value;
             break;
-          default:
-            console.log('Clé non reconnue:', key);
         }
       }
 
       if (user.firstName && user.lastName) {
-        console.log('Utilisateur extrait:', user); // Log de l'utilisateur créé
+        console.log('Utilisateur extrait avec succès:', user);
         users.push(user);
       } else {
         console.log('Utilisateur incomplet ignoré:', user);
@@ -66,6 +68,7 @@ const extractUserInfo = (text: string): Partial<User>[] => {
     }
   }
 
+  console.log('Nombre total d\'utilisateurs extraits:', users.length);
   return users;
 };
 
@@ -77,7 +80,6 @@ export const importUsersFromWord = async (file: File): Promise<User[]> => {
     console.log('Texte extrait du document Word:', result.value);
     
     const users = extractUserInfo(result.value);
-    console.log('Utilisateurs extraits:', users);
     
     if (users.length === 0) {
       toast.error("Aucun utilisateur n'a été trouvé dans le fichier");
