@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { PDFDownloadLink, Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
@@ -137,7 +137,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
           document={<PDFDocument />}
           fileName={`carte-presence-${user.firstName}-${user.lastName}.pdf`}
         >
-          {({ loading, error }) => (
+          {({ blob, url, loading, error }) => (
             <Button disabled={loading} className="w-full">
               {loading ? "Génération..." : "Télécharger la carte"}
             </Button>
