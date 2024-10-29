@@ -5,7 +5,8 @@ import { generateQRCode } from './qrCodeUtils';
 import { toast } from "sonner";
 
 const extractUserInfo = (text: string): Partial<User>[] => {
-  // Format attendu: "Nom: Dupont, Prénom: Jean, Téléphone: 0123456789, Fonction: Manager"
+  // Format attendu (FR): "Nom: Dupont, Prénom: Jean, Téléphone: 0123456789, Fonction: Manager"
+  // Format attendu (MG): "Anarana: Dupont, Fanampiny: Jean, Tel: 0123456789, Asa: Manager"
   const users: Partial<User>[] = [];
   const lines = text.split('\n').filter(line => line.trim());
 
@@ -24,15 +25,19 @@ const extractUserInfo = (text: string): Partial<User>[] => {
         const [key, value] = part.split(':').map(s => s.trim());
         switch (key.toLowerCase()) {
           case 'nom':
+          case 'anarana':
             user.lastName = value;
             break;
           case 'prénom':
+          case 'fanampiny':
             user.firstName = value;
             break;
           case 'téléphone':
+          case 'tel':
             user.phoneNumber = value;
             break;
           case 'fonction':
+          case 'asa':
             user.role = value;
             break;
         }
