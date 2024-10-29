@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { generateQRCode } from '../utils/qrCodeUtils';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { importUsersFromWord } from '../utils/wordImport';
+import { Upload } from 'lucide-react';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -48,10 +50,39 @@ const UserList = () => {
     }
   };
 
+  const handleWordImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      try {
+        await importUsersFromWord(file);
+        loadUsers();
+      } catch (error) {
+        console.error('Erreur lors de l\'importation:', error);
+      }
+    }
+  };
+
   return (
     <Card className="w-full mt-8 bg-gray-900">
-      <CardHeader>
+      <CardHeader className="flex flex-row justify-between items-center">
         <CardTitle className="text-white">Liste des utilisateurs</CardTitle>
+        <div>
+          <input
+            type="file"
+            accept=".docx"
+            onChange={handleWordImport}
+            className="hidden"
+            id="word-import"
+          />
+          <Button
+            onClick={() => document.getElementById('word-import')?.click()}
+            variant="outline"
+            className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Importer depuis Word
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[60vh]">
