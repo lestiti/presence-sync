@@ -41,8 +41,15 @@ const QRScanner = ({ isAdmin }) => {
 
   const handleScan = async (qrCode: string) => {
     try {
-      const record = saveAttendanceRecord(qrCode, 'check-in');
-      toast.success(`Présence enregistrée avec succès`);
+      const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+      const lastRecord = attendance
+        .filter(record => record.userId === qrCode)
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+
+      const type = !lastRecord || lastRecord.type === 'check-out' ? 'check-in' : 'check-out';
+      const record = saveAttendanceRecord(qrCode, type);
+      
+      toast.success(`${type === 'check-in' ? 'Entrée' : 'Sortie'} enregistrée avec succès`);
     } catch (error) {
       toast.error("Erreur lors de l'enregistrement de la présence");
       console.error('Erreur scan:', error);
@@ -74,14 +81,9 @@ const QRScanner = ({ isAdmin }) => {
     }
   };
 
-  const toggleScanning = () => {
-    setScanning(!scanning);
-  };
-
   return (
     <div className="text-center p-4">
       <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        {/* Logo gauche */}
         <div className="rounded-full overflow-hidden w-16 h-16 border-2 border-secondary flex items-center justify-center bg-white">
           <img src="fpvm-logo.png" alt="FPVM Logo" className="w-14 h-14 object-contain" />
         </div>
@@ -107,13 +109,12 @@ const QRScanner = ({ isAdmin }) => {
           )}
         </div>
 
-        {/* Logo droite */}
         <div className="rounded-full overflow-hidden w-16 h-16 border-2 border-secondary flex items-center justify-center bg-white">
           <img src="fpvm-logo.png" alt="FPVM Logo" className="w-14 h-14 object-contain" />
         </div>
       </div>
       <Button 
-        onClick={toggleScanning} 
+        onClick={() => setScanning(!scanning)} 
         className="bg-secondary text-secondary-foreground hover:bg-secondary/90 w-full md:w-auto"
       >
         {scanning ? 'Arrêter le scan' : 'Scanner QR Code'}
