@@ -10,8 +10,7 @@ const AddUserForm = ({ onUserAdded }) => {
     firstName: '',
     lastName: '',
     phoneNumber: '',
-    role: '',
-    email: ''
+    role: ''
   });
 
   const handleInputChange = (e) => {
@@ -32,7 +31,7 @@ const AddUserForm = ({ onUserAdded }) => {
       localStorage.setItem('users', JSON.stringify(updatedUsers));
       
       toast.success("Utilisateur ajouté avec succès!");
-      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '', email: '' });
+      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
       onUserAdded();
     } catch (error) {
       toast.error("Erreur lors de l'ajout de l'utilisateur");
@@ -73,19 +72,6 @@ const AddUserForm = ({ onUserAdded }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Entrez l'email"
-                name="email"
-                value={newUser.email}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
               <Label htmlFor="phoneNumber">Numéro de téléphone</Label>
               <Input
                 id="phoneNumber"
@@ -97,7 +83,7 @@ const AddUserForm = ({ onUserAdded }) => {
               />
             </div>
             
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
               <Label htmlFor="role">Fonction</Label>
               <Input
                 id="role"
