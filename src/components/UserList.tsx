@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { generateQRCode } from '../utils/qrCodeUtils';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import AttendanceCard from './AttendanceCard';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [generatingQR, setGeneratingQR] = useState<string | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -30,6 +30,24 @@ const UserList = () => {
     }
   };
 
+  const handleDownloadQR = async (userId: string) => {
+    try {
+      setGeneratingQR(userId);
+      const qrCodeDataUrl = await generateQRCode(userId);
+      const link = document.createElement('a');
+      link.href = qrCodeDataUrl;
+      link.download = `qr-code-${userId}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("QR Code téléchargé avec succès");
+    } catch (error) {
+      toast.error("Erreur lors de la génération du QR Code");
+    } finally {
+      setGeneratingQR(null);
+    }
+  };
+
   return (
     <Card className="w-full mt-8">
       <CardHeader>
@@ -48,11 +66,12 @@ const UserList = () => {
                 </div>
                 <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                   <Button 
-                    onClick={() => setSelectedUser(user)}
+                    onClick={() => handleDownloadQR(user.id)} 
+                    disabled={generatingQR === user.id}
                     variant="outline"
                     className="w-full md:w-auto"
                   >
-                    Générer carte
+                    {generatingQR === user.id ? 'Génération...' : 'Télécharger QR'}
                   </Button>
                   <Button 
                     onClick={() => handleDeleteUser(user.id)} 
@@ -66,17 +85,6 @@ const UserList = () => {
             ))}
           </ul>
         </ScrollArea>
-
-        {selectedUser && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-4 max-w-lg w-full">
-              <AttendanceCard 
-                user={selectedUser} 
-                onClose={() => setSelectedUser(null)}
-              />
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
