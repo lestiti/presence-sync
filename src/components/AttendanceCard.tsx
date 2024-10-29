@@ -137,7 +137,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
           document={<PDFDocument />}
           fileName={`carte-presence-${user.firstName}-${user.lastName}.pdf`}
         >
-          {({ blob, url, loading, error }) => (
+          {({ loading }) => (
             <Button disabled={loading} className="w-full">
               {loading ? "Génération..." : "Télécharger la carte"}
             </Button>
