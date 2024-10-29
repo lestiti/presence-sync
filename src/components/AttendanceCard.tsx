@@ -133,11 +133,11 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
           <img src={qrCodeUrl} alt="QR Code" className="w-32 h-32" />
         )}
 
-        <PDFDownloadLink 
-          document={<PDFDocument />} 
+        <PDFDownloadLink
+          document={<PDFDocument />}
           fileName={`carte-presence-${user.firstName}-${user.lastName}.pdf`}
         >
-          {({ loading }) => (
+          {({ loading, error }) => (
             <Button disabled={loading} className="w-full">
               {loading ? "Génération..." : "Télécharger la carte"}
             </Button>
