@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
@@ -12,10 +13,12 @@ interface AttendanceCardProps {
     firstName: string;
     lastName: string;
     photoUrl?: string;
+    role?: string;
   };
+  onClose?: () => void;
 }
 
-const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
+const AttendanceCard: React.FC<AttendanceCardProps> = ({ user, onClose }) => {
   const [qrCodeUrl, setQrCodeUrl] = React.useState<string>('');
   const cardRef = React.useRef<HTMLDivElement>(null);
   const expirationDate = new Date();
@@ -51,7 +54,18 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
   };
 
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-md">
+    <div className="relative max-w-sm mx-auto bg-white rounded-lg shadow-md">
+      {onClose && (
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="absolute right-2 top-2 z-10"
+          onClick={onClose}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
+      
       <div ref={cardRef} className="p-6">
         <div className="flex flex-col items-center space-y-4">
           <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16" />
@@ -67,7 +81,10 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
           <div className="text-center">
             <h3 className="font-bold text-gray-800">{user.firstName} {user.lastName}</h3>
             <p className="text-sm text-gray-500">ID: {user.id}</p>
-            <p className="text-xs text-gray-400">
+            {user.role && (
+              <p className="text-sm text-gray-600 mt-1">Fonction: {user.role}</p>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
               Expire le: {expirationDate.toLocaleDateString()}
             </p>
           </div>
