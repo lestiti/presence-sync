@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Upload } from 'lucide-react';
+import { Upload, Download } from 'lucide-react';
 import { importUsersFromWord } from '../utils/wordImport';
+import { generateQRCode } from '../utils/qrCodeUtils';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
@@ -35,13 +36,29 @@ const UserList = () => {
         toast.info("Importation en cours...");
         const importedUsers = await importUsersFromWord(file);
         if (importedUsers.length > 0) {
-          loadUsers(); // Recharger la liste après l'import
+          loadUsers();
           toast.success(`${importedUsers.length} utilisateurs importés avec succès`);
         }
       } catch (error) {
         console.error('Erreur lors de l\'importation:', error);
         toast.error("Erreur lors de l'importation du fichier Word");
       }
+    }
+  };
+
+  const handleDownloadQR = async (user) => {
+    try {
+      const qrCode = await generateQRCode(user.id);
+      const link = document.createElement('a');
+      link.href = qrCode;
+      link.download = `qr-code-${user.firstName}-${user.lastName}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("QR Code téléchargé avec succès");
+    } catch (error) {
+      toast.error("Erreur lors du téléchargement du QR Code");
+      console.error('Error downloading QR code:', error);
     }
   };
 
@@ -76,13 +93,23 @@ const UserList = () => {
                 <p className="text-gray-300">{user.role}</p>
                 <p className="text-gray-300">{user.phoneNumber}</p>
               </div>
-              <Button 
-                onClick={() => handleDeleteUser(user.id)} 
-                variant="destructive"
-                className="w-full md:w-auto"
-              >
-                Supprimer
-              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => handleDownloadQR(user)}
+                  variant="outline"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  QR Code
+                </Button>
+                <Button 
+                  onClick={() => handleDeleteUser(user.id)} 
+                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Supprimer
+                </Button>
+              </div>
             </li>
           ))}
         </ul>
