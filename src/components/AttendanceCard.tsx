@@ -1,9 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 
 interface AttendanceCardProps {
@@ -12,14 +10,13 @@ interface AttendanceCardProps {
     firstName: string;
     lastName: string;
     photoUrl?: string;
+    role: string;
   };
 }
 
 const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
   const [qrCodeUrl, setQrCodeUrl] = React.useState<string>('');
   const cardRef = React.useRef<HTMLDivElement>(null);
-  const expirationDate = new Date();
-  expirationDate.setFullYear(expirationDate.getFullYear() + 1);
 
   React.useEffect(() => {
     generateQRCode();
@@ -27,6 +24,7 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
 
   const generateQRCode = async () => {
     try {
+      const QRCode = await import('qrcode');
       const qrCode = await QRCode.toDataURL(user.id);
       setQrCodeUrl(qrCode);
     } catch (error) {
@@ -51,39 +49,62 @@ const AttendanceCard: React.FC<AttendanceCardProps> = ({ user }) => {
   };
 
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-md">
-      <div ref={cardRef} className="p-6">
-        <div className="flex flex-col items-center space-y-4">
-          <img src="/fpvm-logo.png" alt="FPVM Logo" className="w-16 h-16" />
-          <h2 className="text-xl font-bold text-gray-800">Carte de Présence</h2>
-          
-          <Avatar className="w-24 h-24 border-2 border-gold">
-            <AvatarImage src={user.photoUrl} alt={`${user.firstName} ${user.lastName}`} />
-            <AvatarFallback>
-              {user.firstName[0]}{user.lastName[0]}
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="text-center">
-            <h3 className="font-bold text-gray-800">{user.firstName} {user.lastName}</h3>
-            <p className="text-sm text-gray-500">ID: {user.id}</p>
-            <p className="text-xs text-gray-400">
-              Expire le: {expirationDate.toLocaleDateString()}
-            </p>
+    <div className="max-w-sm mx-auto">
+      <div ref={cardRef} className="relative bg-white rounded-lg shadow-md overflow-hidden">
+        {/* Vagues du haut */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-blue-900 via-blue-700 to-blue-500">
+          <div className="absolute bottom-0 left-0 right-0">
+            <svg viewBox="0 0 1440 320" className="w-full">
+              <path fill="white" fillOpacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div className="relative pt-8 px-6 pb-6">
+          {/* Photo de profil */}
+          <div className="flex justify-center mb-8">
+            <Avatar className="w-32 h-32 border-4 border-blue-700 shadow-lg">
+              <AvatarImage src={user.photoUrl} alt={`${user.firstName} ${user.lastName}`} />
+              <AvatarFallback className="text-2xl bg-blue-100 text-blue-700">
+                {user.firstName[0]}{user.lastName[0]}
+              </AvatarFallback>
+            </Avatar>
           </div>
 
-          {qrCodeUrl && (
-            <div className="mt-4">
-              <img src={qrCodeUrl} alt="QR Code" className="w-32 h-32 mx-auto" />
-            </div>
-          )}
+          {/* Informations */}
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl font-bold tracking-wider text-gray-800">
+              {user.firstName.toUpperCase()} {user.lastName.toUpperCase()}
+            </h2>
+            <p className="text-xl text-gray-600 uppercase tracking-wide">{user.role}</p>
+            
+            {/* QR Code */}
+            {qrCodeUrl && (
+              <div className="mt-6 mb-4">
+                <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48 mx-auto" />
+              </div>
+            )}
+            
+            <p className="text-lg text-gray-500 font-light tracking-wider">
+              ID NO. {user.id}
+            </p>
+          </div>
+        </div>
+
+        {/* Vagues du bas */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-blue-900 via-blue-700 to-blue-500">
+          <div className="absolute top-0 left-0 right-0 transform rotate-180">
+            <svg viewBox="0 0 1440 320" className="w-full">
+              <path fill="white" fillOpacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+          </div>
         </div>
       </div>
 
-      <div className="p-4 border-t border-gray-200">
+      <div className="mt-4">
         <Button 
           onClick={handleDownload} 
-          className="w-full bg-gold hover:bg-yellow-600 text-black"
+          className="w-full bg-blue-700 hover:bg-blue-800 text-white"
         >
           Télécharger la carte
         </Button>
