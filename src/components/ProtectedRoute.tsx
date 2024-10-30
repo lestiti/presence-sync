@@ -8,11 +8,18 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAdminAuth();
+  const { isAuthenticated, login } = useAdminAuth();
   const [showLogin, setShowLogin] = useState(true);
 
   if (!isAuthenticated || showLogin) {
-    return <AdminLogin />;
+    return (
+      <AdminLogin 
+        onLoginSuccess={() => {
+          login();
+          setShowLogin(false);
+        }} 
+      />
+    );
   }
 
   return <>{children}</>;
