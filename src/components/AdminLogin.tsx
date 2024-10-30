@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useAdminAuth } from '../hooks/useAdminAuth';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const AdminLogin = () => {
+interface AdminLoginProps {
+  onLoginSuccess: () => void;
+}
+
+const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAdminAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (id === 'Fpvm services' && password === '2024*FpvmCh') {
-      login();
+      onLoginSuccess();
       toast.success("Connexion réussie!");
     } else {
       toast.error("Identifiants incorrects");
@@ -21,7 +23,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-black">
+    <div className="flex justify-center items-center">
       <Card className="w-full max-w-md bg-gray-900 border-gold">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center text-gold">

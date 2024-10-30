@@ -7,11 +7,12 @@ import AdminLogin from '../components/AdminLogin';
 import DataBackupRestore from '../components/DataBackupRestore';
 import { toast } from "sonner"
 import { useNavigate } from 'react-router-dom';
+import { useAdminAuth } from '../hooks/useAdminAuth';
 
 const Index = () => {
   const navigate = useNavigate();
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const { isAuthenticated: isAdminLoggedIn, login } = useAdminAuth();
 
   const handleReset = () => {
     if (isAdminLoggedIn) {
@@ -49,7 +50,10 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             {showAdminLogin ? (
-              <AdminLogin />
+              <AdminLogin onLoginSuccess={() => {
+                login();
+                setShowAdminLogin(false);
+              }} />
             ) : (
               <>
                 <QRScanner isAdmin={isAdminLoggedIn} />
