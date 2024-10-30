@@ -6,6 +6,7 @@ import Index from "./pages/Index";
 import Users from "./pages/Users";
 import Reports from "./pages/Reports";
 import Login from "./pages/Login";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { initializeStorage } from './utils/localStorage';
 
 const App: React.FC = () => {
@@ -31,8 +32,22 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Index />} />
-            <Route path="/users" element={<Users />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route 
+              path="/users" 
+              element={
+                <ProtectedRoute>
+                  <Users />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/reports" 
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

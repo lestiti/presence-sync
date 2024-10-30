@@ -13,6 +13,7 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (id === 'Fpvm services' && password === '2024*FpvmCh') {
+      localStorage.setItem('isAdmin', 'true');
       toast.success("Connexion réussie!");
       navigate('/');
     } else {
