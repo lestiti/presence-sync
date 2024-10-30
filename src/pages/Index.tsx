@@ -30,14 +30,6 @@ const Index = () => {
     }
   };
 
-  const handleAdminLogin = (success: boolean) => {
-    setIsAdminLoggedIn(success);
-    setShowAdminLogin(false);
-    if (success && showAdminLogin) {
-      handleReset();
-    }
-  };
-
   const handleNavigate = (path: string) => {
     if (isAdminLoggedIn) {
       navigate(path);
@@ -57,7 +49,7 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             {showAdminLogin ? (
-              <AdminLogin onLogin={handleAdminLogin} />
+              <AdminLogin />
             ) : (
               <>
                 <QRScanner isAdmin={isAdminLoggedIn} />
