@@ -1,15 +1,13 @@
-import { useState } from 'react';
+import { create } from 'zustand';
 
-export const useAdminAuth = () => {
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+interface AdminAuthStore {
+  isAuthenticated: boolean;
+  login: () => void;
+  logout: () => void;
+}
 
-  const loginAdmin = (success: boolean) => {
-    setIsAdminLoggedIn(success);
-  };
-
-  const logoutAdmin = () => {
-    setIsAdminLoggedIn(false);
-  };
-
-  return { isAdminLoggedIn, loginAdmin, logoutAdmin };
-};
+export const useAdminAuth = create<AdminAuthStore>((set) => ({
+  isAuthenticated: false,
+  login: () => set({ isAuthenticated: true }),
+  logout: () => set({ isAuthenticated: false }),
+}));
