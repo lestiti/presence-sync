@@ -103,6 +103,8 @@ const UserList = () => {
                 <p className="font-bold text-lg">{user.first_name} {user.last_name}</p>
                 <p className="text-gray-300">{user.role}</p>
                 <p className="text-gray-300">{user.phone_number}</p>
+                <p className="text-gray-300">Synode: {user.synode || 'Non spécifié'}</p>
+                <p className="text-gray-300">Église: {user.eglise || 'Non spécifiée'}</p>
               </div>
               <div className="flex gap-2">
                 <Dialog>

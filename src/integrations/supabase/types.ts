@@ -44,27 +44,33 @@ export type Database = {
       users: {
         Row: {
           created_at: string
+          eglise: string | null
           first_name: string
           id: string
           last_name: string
           phone_number: string | null
           role: string
+          synode: string | null
         }
         Insert: {
           created_at?: string
+          eglise?: string | null
           first_name: string
           id?: string
           last_name: string
           phone_number?: string | null
           role: string
+          synode?: string | null
         }
         Update: {
           created_at?: string
+          eglise?: string | null
           first_name?: string
           id?: string
           last_name?: string
           phone_number?: string | null
           role?: string
+          synode?: string | null
         }
         Relationships: []
       }

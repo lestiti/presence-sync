@@ -13,7 +13,9 @@ const AddUserForm = () => {
     firstName: '',
     lastName: '',
     phoneNumber: '',
-    role: ''
+    role: '',
+    synode: '',
+    eglise: ''
   });
 
   const createUserMutation = useMutation({
@@ -21,7 +23,7 @@ const AddUserForm = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success("Utilisateur ajouté avec succès!");
-      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
+      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '', synode: '', eglise: '' });
     },
     onError: (error) => {
       toast.error("Erreur lors de l'ajout de l'utilisateur");
@@ -92,6 +94,28 @@ const AddUserForm = () => {
                 value={newUser.role}
                 onChange={handleInputChange}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="synode">Synode</Label>
+              <Input
+                id="synode"
+                placeholder="Entrez le synode"
+                name="synode"
+                value={newUser.synode}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="eglise">Église</Label>
+              <Input
+                id="eglise"
+                placeholder="Entrez l'église"
+                name="eglise"
+                value={newUser.eglise}
+                onChange={handleInputChange}
               />
             </div>
           </div>

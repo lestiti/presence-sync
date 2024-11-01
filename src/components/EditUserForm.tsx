@@ -14,6 +14,8 @@ interface EditUserFormProps {
     last_name: string;
     phone_number: string;
     role: string;
+    synode: string;
+    eglise: string;
   };
   onSuccess: () => void;
 }
@@ -25,6 +27,8 @@ const EditUserForm = ({ user, onSuccess }: EditUserFormProps) => {
       lastName: user.last_name,
       phoneNumber: user.phone_number,
       role: user.role,
+      synode: user.synode,
+      eglise: user.eglise,
     }
   });
 
@@ -36,6 +40,8 @@ const EditUserForm = ({ user, onSuccess }: EditUserFormProps) => {
         last_name: data.lastName,
         phone_number: data.phoneNumber,
         role: data.role,
+        synode: data.synode,
+        eglise: data.eglise,
       })
       .eq('id', user.id);
 
@@ -99,6 +105,22 @@ const EditUserForm = ({ user, onSuccess }: EditUserFormProps) => {
         {errors.role && (
           <p className="text-red-500 text-sm">{errors.role.message}</p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="synode">Synode</Label>
+        <Input
+          id="synode"
+          {...register("synode")}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="eglise">Église</Label>
+        <Input
+          id="eglise"
+          {...register("eglise")}
+        />
       </div>
 
       <Button 
