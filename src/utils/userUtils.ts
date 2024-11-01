@@ -32,6 +32,23 @@ export const getUsers = async () => {
 };
 
 export const deleteUser = async (id: string) => {
+  // Vérifier d'abord s'il y a des enregistrements d'assiduité liés
+  const { data: attendanceRecords } = await supabase
+    .from('attendance')
+    .select('id')
+    .eq('user_id', id);
+
+  if (attendanceRecords && attendanceRecords.length > 0) {
+    // Supprimer d'abord les enregistrements d'assiduité
+    const { error: attendanceError } = await supabase
+      .from('attendance')
+      .delete()
+      .eq('user_id', id);
+
+    if (attendanceError) throw attendanceError;
+  }
+
+  // Ensuite, supprimer l'utilisateur
   const { error } = await supabase
     .from('users')
     .delete()

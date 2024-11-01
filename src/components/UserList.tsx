@@ -2,11 +2,13 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Upload, Download } from 'lucide-react';
+import { Upload, Download, Edit } from 'lucide-react';
 import { importUsersFromWord } from '../utils/wordImport';
 import { generateQRCode } from '../utils/qrCodeUtils';
 import { getUsers, deleteUser } from '../utils/userUtils';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import EditUserForm from './EditUserForm';
 
 const UserList = () => {
   const queryClient = useQueryClient();
@@ -72,10 +74,10 @@ const UserList = () => {
   }
 
   return (
-    <div className="w-full mt-8 bg-gray-900">
+    <div className="w-full mt-8 bg-gray-900 rounded-lg">
       <div className="flex flex-row justify-between items-center p-4">
         <h2 className="text-white text-xl">Liste des utilisateurs</h2>
-        <div>
+        <div className="flex gap-2">
           <input
             type="file"
             accept=".docx"
@@ -103,16 +105,39 @@ const UserList = () => {
                 <p className="text-gray-300">{user.phone_number}</p>
               </div>
               <div className="flex gap-2">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Modifier
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Modifier l'utilisateur</DialogTitle>
+                    </DialogHeader>
+                    <EditUserForm user={user} onSuccess={() => {
+                      queryClient.invalidateQueries({ queryKey: ['users'] });
+                    }} />
+                  </DialogContent>
+                </Dialog>
                 <Button 
                   onClick={() => handleDownloadQR(user)}
                   variant="outline"
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   <Download className="mr-2 h-4 w-4" />
                   QR Code
                 </Button>
                 <Button 
-                  onClick={() => deleteMutation.mutate(user.id)}
+                  onClick={() => {
+                    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                      deleteMutation.mutate(user.id);
+                    }
+                  }}
                   variant="destructive"
                   className="bg-red-600 hover:bg-red-700 text-white"
                 >
