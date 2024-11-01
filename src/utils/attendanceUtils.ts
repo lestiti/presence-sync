@@ -25,7 +25,7 @@ export const saveAttendanceRecord = async (userId: string, type: 'check-in' | 'c
 
   return {
     userId,
-    timestamp: data.timestamp,
+    timestamp: new Date(data.timestamp),
     type: type,
     userRole: user.role,
     userName: `${user.first_name} ${user.last_name}`
