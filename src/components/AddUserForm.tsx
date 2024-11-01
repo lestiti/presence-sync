@@ -44,18 +44,33 @@ const AddUserForm = () => {
     let isValid = true;
     const newErrors = { ...errors };
 
-    const requiredFields = ['firstName', 'lastName', 'role', 'synode', 'eglise'];
-    requiredFields.forEach(field => {
-      if (!newUser[field].trim()) {
-        newErrors[field] = `${field === 'firstName' ? 'Le prénom' : 
-                           field === 'lastName' ? 'Le nom' : 
-                           field === 'role' ? 'La fonction' :
-                           field === 'synode' ? 'Le synode' : 
-                           'L\'église'} est requis`;
-        isValid = false;
-      }
-    });
+    // Vérification des champs obligatoires
+    if (!newUser.firstName.trim()) {
+      newErrors.firstName = 'Le prénom est requis';
+      isValid = false;
+    }
 
+    if (!newUser.lastName.trim()) {
+      newErrors.lastName = 'Le nom est requis';
+      isValid = false;
+    }
+
+    if (!newUser.role.trim()) {
+      newErrors.role = 'La fonction est requise';
+      isValid = false;
+    }
+
+    if (!newUser.synode.trim()) {
+      newErrors.synode = 'Le synode est requis';
+      isValid = false;
+    }
+
+    if (!newUser.eglise.trim()) {
+      newErrors.eglise = "L'église est requise";
+      isValid = false;
+    }
+
+    // Validation du numéro de téléphone si fourni
     if (newUser.phoneNumber && !/^[0-9+\s-]*$/.test(newUser.phoneNumber)) {
       newErrors.phoneNumber = 'Numéro de téléphone invalide';
       isValid = false;
@@ -68,6 +83,7 @@ const AddUserForm = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewUser(prev => ({ ...prev, [name]: value }));
+    // Effacer l'erreur quand l'utilisateur commence à taper
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }

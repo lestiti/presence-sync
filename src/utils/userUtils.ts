@@ -5,6 +5,8 @@ export const createUser = async (userData: {
   lastName: string;
   phoneNumber: string;
   role: string;
+  synode: string;
+  eglise: string;
 }) => {
   const { data, error } = await supabase
     .from('users')
@@ -12,7 +14,9 @@ export const createUser = async (userData: {
       first_name: userData.firstName,
       last_name: userData.lastName,
       phone_number: userData.phoneNumber,
-      role: userData.role
+      role: userData.role,
+      synode: userData.synode,
+      eglise: userData.eglise
     })
     .select()
     .single();
