@@ -10,7 +10,7 @@ const Users = () => {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <UserDataBackup />
-        <AddUserForm onUserAdded={() => window.location.reload()} />
+        <AddUserForm />
         <UserList />
       </main>
     </div>

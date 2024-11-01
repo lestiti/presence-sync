@@ -26,18 +26,21 @@ export const saveAttendanceRecord = async (userId: string, type: 'check-in' | 'c
   return {
     userId,
     timestamp: data.timestamp,
-    type,
+    type: type,
     userRole: user.role,
     userName: `${user.first_name} ${user.last_name}`
-  };
+  } as AttendanceRecord;
 };
 
 export const getAttendanceRecords = async (): Promise<AttendanceRecord[]> => {
   const { data, error } = await supabase
     .from('attendance')
     .select(`
-      *,
-      users:user_id (
+      id,
+      user_id,
+      timestamp,
+      type,
+      users (
         first_name,
         last_name,
         role
@@ -50,9 +53,9 @@ export const getAttendanceRecords = async (): Promise<AttendanceRecord[]> => {
   return data.map(record => ({
     userId: record.user_id,
     timestamp: new Date(record.timestamp),
-    type: record.type,
-    userRole: record.users.role,
-    userName: `${record.users.first_name} ${record.users.last_name}`
+    type: record.type as 'check-in' | 'check-out',
+    userRole: record.users?.role || 'N/A',
+    userName: record.users ? `${record.users.first_name} ${record.users.last_name}` : 'N/A'
   }));
 };
 

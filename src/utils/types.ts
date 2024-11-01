@@ -4,7 +4,7 @@ export interface User {
   lastName: string;
   phoneNumber: string;
   role: string;
-  qrCode: string;
+  qrCode?: string;
 }
 
 export interface AttendanceRecord {
