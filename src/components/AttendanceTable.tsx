@@ -1,58 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAttendanceRecords } from '../utils/attendanceUtils';
-
-interface GroupedAttendance {
-  userId: string;
-  userName: string;
-  userRole: string;
-  date: string;
-  checkIn: Date | null;
-  checkOut: Date | null;
-}
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AttendanceTable = () => {
-  const [groupedData, setGroupedData] = useState<GroupedAttendance[]>([]);
-
-  useEffect(() => {
-    const records = getAttendanceRecords();
-    const grouped = groupAttendanceRecords(records);
-    setGroupedData(grouped);
-  }, []);
-
-  const groupAttendanceRecords = (records) => {
-    const grouped = new Map();
-
-    records.forEach(record => {
-      const date = new Date(record.timestamp).toLocaleDateString();
-      const key = `${record.userId}-${date}`;
-      
-      if (!grouped.has(key)) {
-        grouped.set(key, {
-          userId: record.userId,
-          userName: record.userName,
-          userRole: record.userRole,
-          date: date,
-          checkIn: null,
-          checkOut: null
-        });
-      }
-
-      const entry = grouped.get(key);
-      if (record.type === 'check-in') {
-        entry.checkIn = new Date(record.timestamp);
-      } else {
-        entry.checkOut = new Date(record.timestamp);
-      }
-    });
-
-    return Array.from(grouped.values());
-  };
+  const { data: groupedData, isLoading } = useQuery({
+    queryKey: ['attendance'],
+    queryFn: getAttendanceRecords
+  });
 
   const formatTime = (date: Date | null) => {
     if (!date) return '-';
-    return date.toLocaleTimeString();
+    return new Date(date).toLocaleTimeString();
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-8 w-full" />
+      </div>
+    );
+  }
 
   return (
     <Table>
@@ -61,18 +32,18 @@ const AttendanceTable = () => {
           <TableHead>Nom et Prénom</TableHead>
           <TableHead>Fonction</TableHead>
           <TableHead>Date</TableHead>
-          <TableHead>Heure d'entrée</TableHead>
-          <TableHead>Heure de sortie</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Heure</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {groupedData.map((entry, index) => (
+        {groupedData?.map((entry, index) => (
           <TableRow key={index}>
             <TableCell>{entry.userName || 'N/A'}</TableCell>
             <TableCell>{entry.userRole}</TableCell>
-            <TableCell>{entry.date}</TableCell>
-            <TableCell>{formatTime(entry.checkIn)}</TableCell>
-            <TableCell>{formatTime(entry.checkOut)}</TableCell>
+            <TableCell>{new Date(entry.timestamp).toLocaleDateString()}</TableCell>
+            <TableCell>{entry.type === 'check-in' ? 'Entrée' : 'Sortie'}</TableCell>
+            <TableCell>{formatTime(entry.timestamp)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

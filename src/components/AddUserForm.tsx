@@ -1,16 +1,32 @@
 import React, { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { createUser } from '../utils/userUtils';
 
-const AddUserForm = ({ onUserAdded }) => {
+const AddUserForm = () => {
+  const queryClient = useQueryClient();
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
     phoneNumber: '',
     role: ''
+  });
+
+  const createUserMutation = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success("Utilisateur ajouté avec succès!");
+      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
+    },
+    onError: (error) => {
+      toast.error("Erreur lors de l'ajout de l'utilisateur");
+      console.error('Error adding user:', error);
+    }
   });
 
   const handleInputChange = (e) => {
@@ -20,23 +36,7 @@ const AddUserForm = ({ onUserAdded }) => {
 
   const handleAddUser = async (e) => {
     e.preventDefault();
-    try {
-      const userWithId = {
-        ...newUser,
-        id: Date.now().toString(),
-      };
-      
-      const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const updatedUsers = [...existingUsers, userWithId];
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
-      
-      toast.success("Utilisateur ajouté avec succès!");
-      setNewUser({ firstName: '', lastName: '', phoneNumber: '', role: '' });
-      onUserAdded();
-    } catch (error) {
-      toast.error("Erreur lors de l'ajout de l'utilisateur");
-      console.error('Error adding user:', error);
-    }
+    createUserMutation.mutate(newUser);
   };
 
   return (
@@ -96,8 +96,12 @@ const AddUserForm = ({ onUserAdded }) => {
             </div>
           </div>
           
-          <Button type="submit" className="w-full">
-            Ajouter l'utilisateur
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={createUserMutation.isPending}
+          >
+            {createUserMutation.isPending ? 'Ajout en cours...' : 'Ajouter l\'utilisateur'}
           </Button>
         </form>
       </CardContent>

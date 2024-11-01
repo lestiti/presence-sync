@@ -1,29 +1,59 @@
+import { supabase } from "@/integrations/supabase/client";
 import { AttendanceRecord } from './types';
 
-export const saveAttendanceRecord = (userId: string, type: 'check-in' | 'check-out') => {
-  const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  const user = users.find((u: any) => u.id === userId);
+export const saveAttendanceRecord = async (userId: string, type: 'check-in' | 'check-out') => {
+  const { data: user } = await supabase
+    .from('users')
+    .select('first_name, last_name, role')
+    .eq('id', userId)
+    .single();
   
   if (!user) {
     throw new Error('Utilisateur non trouvé');
   }
 
-  const newRecord: AttendanceRecord = {
+  const { data, error } = await supabase
+    .from('attendance')
+    .insert({
+      user_id: userId,
+      type,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return {
     userId,
-    timestamp: new Date(),
+    timestamp: data.timestamp,
     type,
     userRole: user.role,
-    userName: `${user.firstName} ${user.lastName}`
+    userName: `${user.first_name} ${user.last_name}`
   };
-
-  attendance.push(newRecord);
-  localStorage.setItem('attendance', JSON.stringify(attendance));
-  return newRecord;
 };
 
-export const getAttendanceRecords = (): AttendanceRecord[] => {
-  return JSON.parse(localStorage.getItem('attendance') || '[]');
+export const getAttendanceRecords = async (): Promise<AttendanceRecord[]> => {
+  const { data, error } = await supabase
+    .from('attendance')
+    .select(`
+      *,
+      users:user_id (
+        first_name,
+        last_name,
+        role
+      )
+    `)
+    .order('timestamp', { ascending: false });
+
+  if (error) throw error;
+
+  return data.map(record => ({
+    userId: record.user_id,
+    timestamp: new Date(record.timestamp),
+    type: record.type,
+    userRole: record.users.role,
+    userName: `${record.users.first_name} ${record.users.last_name}`
+  }));
 };
 
 export const formatAttendanceData = (data: AttendanceRecord[]) => {
