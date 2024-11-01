@@ -8,6 +8,8 @@ import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { AttendanceRecord } from '../utils/types';
 import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import AttendanceStats from './AttendanceStats';
 
 interface ReportGeneratorProps {
   attendanceData: AttendanceRecord[];
@@ -16,11 +18,29 @@ interface ReportGeneratorProps {
 const ReportGenerator: React.FC<ReportGeneratorProps> = ({ attendanceData }) => {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [endDate, setEndDate] = useState<Date>(new Date());
+  const [filterSynode, setFilterSynode] = useState<string>('all');
+  const [filterEglise, setFilterEglise] = useState<string>('all');
+
+  const getUniqueSynodes = () => {
+    const synodes = new Set(attendanceData.map(entry => entry.userRole.split(' - ')[0]));
+    return Array.from(synodes);
+  };
+
+  const getUniqueEglises = () => {
+    const eglises = new Set(attendanceData.map(entry => entry.userRole.split(' - ')[1]));
+    return Array.from(eglises);
+  };
 
   const filterDataByDateRange = () => {
     return attendanceData.filter(entry => {
       const entryDate = new Date(entry.timestamp);
-      return entryDate >= startDate && entryDate <= endDate;
+      const matchesSynode = filterSynode === 'all' || entry.userRole.includes(filterSynode);
+      const matchesEglise = filterEglise === 'all' || entry.userRole.includes(filterEglise);
+      
+      return entryDate >= startDate && 
+             entryDate <= endDate && 
+             matchesSynode && 
+             matchesEglise;
     });
   };
 
@@ -59,6 +79,9 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ attendanceData }) => 
       pdf.setFontSize(12);
       pdf.text(`Période : ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`, 20, 20);
       
+      if (filterSynode !== 'all') pdf.text(`Synode : ${filterSynode}`, 20, 30);
+      if (filterEglise !== 'all') pdf.text(`Église : ${filterEglise}`, 20, 40);
+      
       (pdf as any).autoTable({
         head: [['Nom', 'Fonction', 'Date', 'Entrée', 'Sortie', 'Durée']],
         body: formattedData.map(entry => [
@@ -69,7 +92,7 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ attendanceData }) => 
           entry.checkOut,
           entry.duration
         ]),
-        startY: 30,
+        startY: filterSynode !== 'all' || filterEglise !== 'all' ? 50 : 30,
         theme: 'grid',
         styles: { fontSize: 8 },
         headStyles: { fillColor: [218, 165, 32] }
@@ -86,8 +109,12 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ attendanceData }) => 
     }
   };
 
+  const filteredData = filterDataByDateRange();
+
   return (
     <div className="space-y-6">
+      <AttendanceStats data={filteredData} />
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">Date de début</label>
@@ -96,6 +123,38 @@ const ReportGenerator: React.FC<ReportGeneratorProps> = ({ attendanceData }) => 
         <div>
           <label className="block text-sm font-medium mb-2">Date de fin</label>
           <CustomDatePicker date={endDate} setDate={setEndDate} />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Synode</label>
+          <Select value={filterSynode} onValueChange={setFilterSynode}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner un synode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les synodes</SelectItem>
+              {getUniqueSynodes().map((synode) => (
+                <SelectItem key={synode} value={synode}>{synode}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Église</label>
+          <Select value={filterEglise} onValueChange={setFilterEglise}>
+            <SelectTrigger>
+              <SelectValue placeholder="Sélectionner une église" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les églises</SelectItem>
+              {getUniqueEglises().map((eglise) => (
+                <SelectItem key={eglise} value={eglise}>{eglise}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       
