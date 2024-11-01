@@ -92,8 +92,16 @@ const EditUserForm = ({ user, onSuccess }: EditUserFormProps) => {
         <Label htmlFor="phoneNumber">Numéro de téléphone</Label>
         <Input
           id="phoneNumber"
-          {...register("phoneNumber")}
+          {...register("phoneNumber", { 
+            pattern: {
+              value: /^[0-9+\s-]*$/,
+              message: "Veuillez entrer un numéro de téléphone valide"
+            }
+          })}
         />
+        {errors.phoneNumber && (
+          <p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -111,16 +119,22 @@ const EditUserForm = ({ user, onSuccess }: EditUserFormProps) => {
         <Label htmlFor="synode">Synode</Label>
         <Input
           id="synode"
-          {...register("synode")}
+          {...register("synode", { required: "Le synode est requis" })}
         />
+        {errors.synode && (
+          <p className="text-red-500 text-sm">{errors.synode.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="eglise">Église</Label>
         <Input
           id="eglise"
-          {...register("eglise")}
+          {...register("eglise", { required: "L'église est requise" })}
         />
+        {errors.eglise && (
+          <p className="text-red-500 text-sm">{errors.eglise.message}</p>
+        )}
       </div>
 
       <Button 
