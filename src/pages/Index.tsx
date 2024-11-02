@@ -13,6 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { isAuthenticated: isAdminLoggedIn, login } = useAdminAuth();
+  const logoUrl = "https://utwzgxqrhmxozhtftajy.supabase.co/storage/v1/object/public/logos/Design%20sans%20titre.png";
 
   const handleReset = () => {
     if (isAdminLoggedIn) {
@@ -43,6 +44,14 @@ const Index = () => {
     <div className="min-h-screen bg-black text-white">
       <Header />
       <main className="container mx-auto px-4 py-8">
+        <div className="flex justify-center gap-8 mb-8">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold">
+            <img src={logoUrl} alt="FPVM Logo" className="w-full h-full object-cover" />
+          </div>
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold">
+            <img src={logoUrl} alt="FPVM Logo" className="w-full h-full object-cover" />
+          </div>
+        </div>
         <Card className="bg-gray-900 border-gold">
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-gold">Bienvenue sur FPVM Checking</CardTitle>
