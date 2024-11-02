@@ -13,7 +13,8 @@ const Index = () => {
   const navigate = useNavigate();
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { isAuthenticated: isAdminLoggedIn, login } = useAdminAuth();
-  const logoUrl = "https://utwzgxqrhmxozhtftajy.supabase.co/storage/v1/object/public/logos/Design%20sans%20titre.png";
+  const logoUrl = encodeURI("https://utwzgxqrhmxozhtftajy.supabase.co/storage/v1/object/public/logos/Design sans titre.png");
+  const [logoLoadError, setLogoLoadError] = useState(false);
 
   const handleReset = () => {
     if (isAdminLoggedIn) {
@@ -40,35 +41,35 @@ const Index = () => {
     }
   };
 
+  const handleLogoError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.onerror = null;
+    setLogoLoadError(true);
+    console.error('Erreur de chargement du logo');
+    toast.error("Erreur de chargement du logo");
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-center gap-8 mb-8">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white p-2">
             <img 
-              src={logoUrl} 
+              src={logoUrl}
               alt="FPVM Logo" 
-              className="w-20 h-20 object-contain"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.onerror = null;
-                console.error('Erreur de chargement du logo');
-                toast.error("Erreur de chargement du logo");
-              }}
+              className="w-full h-full object-contain"
+              onError={handleLogoError}
+              style={{ display: logoLoadError ? 'none' : 'block' }}
             />
           </div>
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white p-2">
             <img 
-              src={logoUrl} 
+              src={logoUrl}
               alt="FPVM Logo" 
-              className="w-20 h-20 object-contain"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.onerror = null;
-                console.error('Erreur de chargement du logo');
-                toast.error("Erreur de chargement du logo");
-              }}
+              className="w-full h-full object-contain"
+              onError={handleLogoError}
+              style={{ display: logoLoadError ? 'none' : 'block' }}
             />
           </div>
         </div>
