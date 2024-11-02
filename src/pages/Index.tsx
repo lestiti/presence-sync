@@ -13,7 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { isAuthenticated: isAdminLoggedIn, login } = useAdminAuth();
-  const logoUrl = encodeURI("https://utwzgxqrhmxozhtftajy.supabase.co/storage/v1/object/public/logos/Design sans titre.png");
+  const logoUrl = "https://utwzgxqrhmxozhtftajy.supabase.co/storage/v1/object/public/logos/fpvm-logo.png";
   const [logoLoadError, setLogoLoadError] = useState(false);
 
   const handleReset = () => {
