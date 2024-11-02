@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import jsQR from "jsqr";
 import { saveAttendanceRecord } from '../utils/attendanceUtils';
+import { supabase } from "@/integrations/supabase/client";
 
 const QRScanner = ({ isAdmin }) => {
   const [scanning, setScanning] = useState(false);
@@ -15,6 +16,27 @@ const QRScanner = ({ isAdmin }) => {
     } else {
       stopScanning();
     }
+
+    // Souscrire aux changements en temps réel
+    const subscription = supabase
+      .channel('attendance_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'attendance' 
+        }, 
+        payload => {
+          console.log('Changement détecté:', payload);
+          // Vous pouvez ajouter ici une logique pour mettre à jour l'interface utilisateur
+          // par exemple, rafraîchir une liste ou afficher une notification
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [scanning]);
 
   const startScanning = async () => {
@@ -41,13 +63,17 @@ const QRScanner = ({ isAdmin }) => {
 
   const handleScan = async (qrCode: string) => {
     try {
-      const attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
-      const lastRecord = attendance
-        .filter(record => record.userId === qrCode)
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+      // Vérifier la dernière action de l'utilisateur
+      const { data: lastRecord } = await supabase
+        .from('attendance')
+        .select('type')
+        .eq('user_id', qrCode)
+        .order('timestamp', { ascending: false })
+        .limit(1)
+        .single();
 
       const type = !lastRecord || lastRecord.type === 'check-out' ? 'check-in' : 'check-out';
-      const record = saveAttendanceRecord(qrCode, type);
+      const record = await saveAttendanceRecord(qrCode, type);
       
       toast.success(`${type === 'check-in' ? 'Entrée' : 'Sortie'} enregistrée avec succès`);
     } catch (error) {
