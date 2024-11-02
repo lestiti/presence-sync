@@ -45,11 +45,31 @@ const Index = () => {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-center gap-8 mb-8">
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold">
-            <img src={logoUrl} alt="FPVM Logo" className="w-full h-full object-cover" />
+          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white">
+            <img 
+              src={logoUrl} 
+              alt="FPVM Logo" 
+              className="w-20 h-20 object-contain"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                console.error('Erreur de chargement du logo');
+                toast.error("Erreur de chargement du logo");
+              }}
+            />
           </div>
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gold">
-            <img src={logoUrl} alt="FPVM Logo" className="w-full h-full object-cover" />
+          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white">
+            <img 
+              src={logoUrl} 
+              alt="FPVM Logo" 
+              className="w-20 h-20 object-contain"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                console.error('Erreur de chargement du logo');
+                toast.error("Erreur de chargement du logo");
+              }}
+            />
           </div>
         </div>
         <Card className="bg-gray-900 border-gold">
