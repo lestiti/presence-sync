@@ -13,7 +13,6 @@ const Index = () => {
   const navigate = useNavigate();
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { isAuthenticated: isAdminLoggedIn, login } = useAdminAuth();
-  const [imageLoadError, setImageLoadError] = useState(false);
 
   const handleReset = () => {
     if (isAdminLoggedIn) {
@@ -40,36 +39,10 @@ const Index = () => {
     }
   };
 
-  const handleImageError = () => {
-    setImageLoadError(true);
-    console.error('Erreur de chargement de l\'image');
-    toast.error("Erreur de chargement de l'image");
-  };
-
   return (
     <div className="min-h-screen bg-black text-white">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-center gap-8 mb-8">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white p-2">
-            <img 
-              src="https://images.unsplash.com/photo-1473177104440-ffee2f376098"
-              alt="Église intérieur"
-              className="w-full h-full object-cover"
-              onError={handleImageError}
-              style={{ display: imageLoadError ? 'none' : 'block' }}
-            />
-          </div>
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white p-2">
-            <img 
-              src="https://images.unsplash.com/photo-1492321936769-b49830bc1d1e"
-              alt="Église extérieur"
-              className="w-full h-full object-cover"
-              onError={handleImageError}
-              style={{ display: imageLoadError ? 'none' : 'block' }}
-            />
-          </div>
-        </div>
         <Card className="bg-gray-900 border-gold">
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-gold">Bienvenue sur FPVM Checking</CardTitle>
