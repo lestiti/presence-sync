@@ -4,11 +4,14 @@ import { toast } from "sonner"
 import jsQR from "jsqr";
 import { saveAttendanceRecord } from '../utils/attendanceUtils';
 import { supabase } from "@/integrations/supabase/client";
+import { Camera, StopCircle } from 'lucide-react';
 
 const QRScanner = ({ isAdmin }) => {
   const [scanning, setScanning] = useState(false);
+  const [lastScan, setLastScan] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const scanTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (scanning) {
@@ -17,7 +20,6 @@ const QRScanner = ({ isAdmin }) => {
       stopScanning();
     }
 
-    // Souscrire aux changements en temps réel
     const subscription = supabase
       .channel('attendance_changes')
       .on('postgres_changes', 
@@ -28,23 +30,32 @@ const QRScanner = ({ isAdmin }) => {
         }, 
         payload => {
           console.log('Changement détecté:', payload);
-          // Vous pouvez ajouter ici une logique pour mettre à jour l'interface utilisateur
-          // par exemple, rafraîchir une liste ou afficher une notification
         }
       )
       .subscribe();
 
     return () => {
       subscription.unsubscribe();
+      if (scanTimeoutRef.current) {
+        clearTimeout(scanTimeoutRef.current);
+      }
     };
   }, [scanning]);
 
   const startScanning = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      const constraints = {
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      };
+      
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        await videoRef.current.play();
         requestAnimationFrame(tick);
       }
     } catch (err) {
@@ -63,7 +74,14 @@ const QRScanner = ({ isAdmin }) => {
 
   const handleScan = async (qrCode: string) => {
     try {
-      // Vérifier la dernière action de l'utilisateur
+      // Éviter les scans multiples du même code QR
+      if (lastScan === qrCode && scanTimeoutRef.current) {
+        return;
+      }
+      
+      setLastScan(qrCode);
+      scanTimeoutRef.current = setTimeout(() => setLastScan(null), 5000);
+
       const { data: lastRecord } = await supabase
         .from('attendance')
         .select('type')
@@ -76,15 +94,19 @@ const QRScanner = ({ isAdmin }) => {
       const record = await saveAttendanceRecord(qrCode, type);
       
       toast.success(`${type === 'check-in' ? 'Entrée' : 'Sortie'} enregistrée avec succès`);
+      
+      // Vibrer pour confirmer le scan
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
     } catch (error) {
-      toast.error("Erreur lors de l'enregistrement de la présence");
       console.error('Erreur scan:', error);
+      toast.error("Erreur lors de l'enregistrement de la présence");
     }
-    setScanning(false);
   };
 
   const tick = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && scanning) {
       if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
         canvasRef.current.height = videoRef.current.videoHeight;
         canvasRef.current.width = videoRef.current.videoWidth;
@@ -97,13 +119,10 @@ const QRScanner = ({ isAdmin }) => {
           });
           if (code) {
             handleScan(code.data);
-            return;
           }
         }
       }
-      if (scanning) {
-        requestAnimationFrame(tick);
-      }
+      requestAnimationFrame(tick);
     }
   };
 
@@ -126,11 +145,14 @@ const QRScanner = ({ isAdmin }) => {
                 className="absolute top-0 left-0 w-full h-full" 
                 style={{ display: 'none' }} 
               />
-              <div className="absolute top-0 left-0 w-full h-full border-2 border-secondary rounded-lg"></div>
+              <div className="absolute top-0 left-0 w-full h-full border-2 border-secondary rounded-lg">
+                <div className="absolute inset-0 border-4 border-secondary opacity-50"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-secondary"></div>
+              </div>
             </>
           ) : (
             <div className="w-full h-full bg-primary flex items-center justify-center rounded-lg">
-              <span className="text-muted-foreground">QR Code Scanner</span>
+              <span className="text-muted-foreground">Scanner QR Code</span>
             </div>
           )}
         </div>
@@ -141,9 +163,19 @@ const QRScanner = ({ isAdmin }) => {
       </div>
       <Button 
         onClick={() => setScanning(!scanning)} 
-        className="bg-secondary text-secondary-foreground hover:bg-secondary/90 w-full md:w-auto"
+        className={`bg-secondary text-secondary-foreground hover:bg-secondary/90 w-full md:w-auto ${scanning ? 'bg-red-500 hover:bg-red-600' : ''}`}
       >
-        {scanning ? 'Arrêter le scan' : 'Scanner QR Code'}
+        {scanning ? (
+          <>
+            <StopCircle className="mr-2 h-4 w-4" />
+            Arrêter le scan
+          </>
+        ) : (
+          <>
+            <Camera className="mr-2 h-4 w-4" />
+            Scanner QR Code
+          </>
+        )}
       </Button>
     </div>
   );
