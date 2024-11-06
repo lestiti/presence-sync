@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Church, Download, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -27,26 +27,22 @@ const Header = () => {
   };
 
   const NavLinks = () => (
-    <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-      <li><a href="/" className="hover:text-white block">Accueil</a></li>
-      <li><a href="/users" className="hover:text-white block">Utilisateurs</a></li>
-      <li><a href="/reports" className="hover:text-white block">Rapports</a></li>
+    <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8">
+      <li><a href="/" className="hover:text-white block transition-colors">Accueil</a></li>
+      <li><a href="/users" className="hover:text-white block transition-colors">Utilisateurs</a></li>
+      <li><a href="/reports" className="hover:text-white block transition-colors">Rapports</a></li>
     </ul>
   );
 
   return (
-    <header className="bg-gray-900 text-gold p-4">
+    <header className="bg-gray-900 text-gold p-6">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center">
-          <Church className="mr-2" />
-          <h1 className="text-xl md:text-2xl font-bold">FPVM Checking</h1>
-        </div>
+        <h1 className="text-xl md:text-2xl font-bold">FPVM Checking</h1>
         
         <nav className="hidden md:flex items-center">
           <NavLinks />
           {deferredPrompt && (
-            <Button onClick={handleInstall} variant="outline" size="sm" className="ml-4">
-              <Download className="mr-2 h-4 w-4" />
+            <Button onClick={handleInstall} variant="outline" size="sm" className="ml-8">
               Installer l'app
             </Button>
           )}
@@ -63,7 +59,6 @@ const Header = () => {
               <NavLinks />
               {deferredPrompt && (
                 <Button onClick={handleInstall} variant="outline" size="sm" className="mt-4">
-                  <Download className="mr-2 h-4 w-4" />
                   Installer l'app
                 </Button>
               )}

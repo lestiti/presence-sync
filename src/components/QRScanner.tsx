@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import jsQR from "jsqr";
 import { saveAttendanceRecord } from '../utils/attendanceUtils';
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, StopCircle, Church } from 'lucide-react';
+import { Camera, StopCircle } from 'lucide-react';
 
 const QRScanner = ({ isAdmin }) => {
   const [scanning, setScanning] = useState(false);
@@ -128,39 +128,30 @@ const QRScanner = ({ isAdmin }) => {
 
   return (
     <div className="text-center p-4">
-      <div className="mb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="rounded-full overflow-hidden w-16 h-16 border-2 border-secondary flex items-center justify-center bg-white">
-          <Church className="w-8 h-8 text-primary" />
-        </div>
-        
-        <div className="relative w-full max-w-[300px] md:max-w-[400px] aspect-square mx-auto">
-          {scanning ? (
-            <>
-              <video 
-                ref={videoRef} 
-                className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
-              />
-              <canvas 
-                ref={canvasRef} 
-                className="absolute top-0 left-0 w-full h-full" 
-                style={{ display: 'none' }} 
-              />
-              <div className="absolute top-0 left-0 w-full h-full border-2 border-secondary rounded-lg">
-                <div className="absolute inset-0 border-4 border-secondary opacity-50"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-secondary"></div>
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full bg-primary flex items-center justify-center rounded-lg">
-              <span className="text-muted-foreground">Scanner QR Code</span>
+      <div className="relative w-full max-w-[300px] md:max-w-[400px] aspect-square mx-auto mb-6">
+        {scanning ? (
+          <>
+            <video 
+              ref={videoRef} 
+              className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
+            />
+            <canvas 
+              ref={canvasRef} 
+              className="absolute top-0 left-0 w-full h-full" 
+              style={{ display: 'none' }} 
+            />
+            <div className="absolute top-0 left-0 w-full h-full border-2 border-secondary rounded-lg">
+              <div className="absolute inset-0 border-4 border-secondary opacity-50"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-secondary"></div>
             </div>
-          )}
-        </div>
-
-        <div className="rounded-full overflow-hidden w-16 h-16 border-2 border-secondary flex items-center justify-center bg-white">
-          <Church className="w-8 h-8 text-primary" />
-        </div>
+          </>
+        ) : (
+          <div className="w-full h-full bg-primary flex items-center justify-center rounded-lg">
+            <span className="text-muted-foreground">Scanner QR Code</span>
+          </div>
+        )}
       </div>
+      
       <Button 
         onClick={() => setScanning(!scanning)} 
         className={`bg-secondary text-secondary-foreground hover:bg-secondary/90 w-full md:w-auto ${scanning ? 'bg-red-500 hover:bg-red-600' : ''}`}
