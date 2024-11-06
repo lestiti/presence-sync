@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Download, Menu, X } from 'lucide-react';
+import { Church, Download, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -38,11 +38,10 @@ const Header = () => {
     <header className="bg-gray-900 text-gold p-4">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <Clock className="mr-2" />
+          <Church className="mr-2" />
           <h1 className="text-xl md:text-2xl font-bold">FPVM Checking</h1>
         </div>
         
-        {/* Navigation pour desktop */}
         <nav className="hidden md:flex items-center">
           <NavLinks />
           {deferredPrompt && (
@@ -53,7 +52,6 @@ const Header = () => {
           )}
         </nav>
 
-        {/* Menu hamburger pour mobile */}
         <Sheet>
           <SheetTrigger asChild className="md:hidden">
             <Button variant="outline" size="icon">
