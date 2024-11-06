@@ -13,8 +13,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const { isAuthenticated: isAdminLoggedIn, login } = useAdminAuth();
-  const logoUrl = "https://utwzgxqrhmxozhtftajy.supabase.co/storage/v1/object/public/logos/fpvm-logo.png";
-  const [logoLoadError, setLogoLoadError] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
 
   const handleReset = () => {
     if (isAdminLoggedIn) {
@@ -41,12 +40,10 @@ const Index = () => {
     }
   };
 
-  const handleLogoError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.target as HTMLImageElement;
-    target.onerror = null;
-    setLogoLoadError(true);
-    console.error('Erreur de chargement du logo');
-    toast.error("Erreur de chargement du logo");
+  const handleImageError = () => {
+    setImageLoadError(true);
+    console.error('Erreur de chargement de l\'image');
+    toast.error("Erreur de chargement de l'image");
   };
 
   return (
@@ -56,20 +53,20 @@ const Index = () => {
         <div className="flex justify-center gap-8 mb-8">
           <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white p-2">
             <img 
-              src={logoUrl}
-              alt="FPVM Logo" 
-              className="w-full h-full object-contain"
-              onError={handleLogoError}
-              style={{ display: logoLoadError ? 'none' : 'block' }}
+              src="https://images.unsplash.com/photo-1473177104440-ffee2f376098"
+              alt="Église intérieur"
+              className="w-full h-full object-cover"
+              onError={handleImageError}
+              style={{ display: imageLoadError ? 'none' : 'block' }}
             />
           </div>
           <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold flex items-center justify-center bg-white p-2">
             <img 
-              src={logoUrl}
-              alt="FPVM Logo" 
-              className="w-full h-full object-contain"
-              onError={handleLogoError}
-              style={{ display: logoLoadError ? 'none' : 'block' }}
+              src="https://images.unsplash.com/photo-1492321936769-b49830bc1d1e"
+              alt="Église extérieur"
+              className="w-full h-full object-cover"
+              onError={handleImageError}
+              style={{ display: imageLoadError ? 'none' : 'block' }}
             />
           </div>
         </div>
