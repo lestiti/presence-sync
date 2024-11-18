@@ -6,7 +6,6 @@ import Index from "./pages/Index";
 import Users from "./pages/Users";
 import Reports from "./pages/Reports";
 import Login from "./pages/Login";
-import ProtectedRoute from "./components/ProtectedRoute";
 
 const App: React.FC = () => {
   return (
@@ -17,22 +16,8 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Index />} />
-            <Route 
-              path="/users" 
-              element={
-                <ProtectedRoute>
-                  <Users />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/reports" 
-              element={
-                <ProtectedRoute>
-                  <Reports />
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/users" element={<Users />} />
+            <Route path="/reports" element={<Reports />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
