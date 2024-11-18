@@ -37,7 +37,7 @@ const Index = () => {
             <CardDescription className="text-gray-400">Gérez vos présences facilement avec notre système de pointage par QR code</CardDescription>
           </CardHeader>
           <CardContent>
-            <QRScanner isAdmin={true} />
+            <QRScanner />
             <DataBackupRestore />
           </CardContent>
           <CardFooter className="flex justify-between">
