@@ -1,42 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Header from '../components/Header';
 import QRScanner from '../components/QRScanner';
-import AdminLogin from '../components/AdminLogin';
 import DataBackupRestore from '../components/DataBackupRestore';
 import { toast } from "sonner"
 import { useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '../hooks/useAdminAuth';
 
 const Index = () => {
   const navigate = useNavigate();
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
-  const { isAuthenticated: isAdminLoggedIn, login } = useAdminAuth();
 
   const handleReset = () => {
-    if (isAdminLoggedIn) {
-      try {
-        localStorage.clear();
-        localStorage.setItem('users', JSON.stringify([]));
-        localStorage.setItem('attendance', JSON.stringify([]));
-        
-        toast.success("L'application a été réinitialisée avec succès");
-        navigate('/login');
-      } catch (error) {
-        toast.error("Erreur lors de la réinitialisation de l'application");
-      }
-    } else {
-      setShowAdminLogin(true);
+    try {
+      localStorage.clear();
+      localStorage.setItem('users', JSON.stringify([]));
+      localStorage.setItem('attendance', JSON.stringify([]));
+      
+      toast.success("L'application a été réinitialisée avec succès");
+      navigate('/');
+    } catch (error) {
+      toast.error("Erreur lors de la réinitialisation de l'application");
     }
   };
 
   const handleNavigate = (path: string) => {
-    if (isAdminLoggedIn) {
-      navigate(path);
-    } else {
-      setShowAdminLogin(true);
-    }
+    navigate(path);
   };
 
   return (
@@ -49,17 +37,8 @@ const Index = () => {
             <CardDescription className="text-gray-400">Gérez vos présences facilement avec notre système de pointage par QR code</CardDescription>
           </CardHeader>
           <CardContent>
-            {showAdminLogin ? (
-              <AdminLogin onLoginSuccess={() => {
-                login();
-                setShowAdminLogin(false);
-              }} />
-            ) : (
-              <>
-                <QRScanner isAdmin={isAdminLoggedIn} />
-                {isAdminLoggedIn && <DataBackupRestore />}
-              </>
-            )}
+            <QRScanner isAdmin={true} />
+            <DataBackupRestore />
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button 
