@@ -6,7 +6,7 @@ import { saveAttendanceRecord } from '../utils/attendanceUtils';
 import { supabase } from "@/integrations/supabase/client";
 import { Camera, StopCircle } from 'lucide-react';
 
-const QRScanner = ({ isAdmin }) => {
+const QRScanner = () => {
   const [scanning, setScanning] = useState(false);
   const [lastScan, setLastScan] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -74,7 +74,6 @@ const QRScanner = ({ isAdmin }) => {
 
   const handleScan = async (qrCode: string) => {
     try {
-      // Éviter les scans multiples du même code QR
       if (lastScan === qrCode && scanTimeoutRef.current) {
         return;
       }
@@ -95,7 +94,6 @@ const QRScanner = ({ isAdmin }) => {
       
       toast.success(`${type === 'check-in' ? 'Entrée' : 'Sortie'} enregistrée avec succès`);
       
-      // Vibrer pour confirmer le scan
       if (navigator.vibrate) {
         navigator.vibrate(200);
       }
