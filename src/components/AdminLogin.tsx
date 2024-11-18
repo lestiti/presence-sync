@@ -14,7 +14,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (id === 'Fpvm services' && password === '2024*FpvmCh') {
+    if (id === 'AdminFp' && password === 'Fpvm*3131') {
       onLoginSuccess();
       toast.success("Connexion réussie!");
     } else {
